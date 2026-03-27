@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Saha CRM">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#003DA5">
+<title>Saha CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Saha CRM&quot;,&quot;short_name&quot;:&quot;SahaCRM&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23f4f6fb&quot;,&quot;theme_color&quot;:&quot;%23003DA5&quot;,&quot;orientation&quot;:&quot;portrait&quot;}">
+<style>
+/* ── CRM Renk Paleti (birebir) ── */
+:root {
+  --navy:      #003DA5;
+  --navy-l:    #1a56c4;
+  --navy-pale: #E0E8F7;
+  --red:       #CC0000;
+  --red-pale:  #fdeaea;
+  --green:     #1A7A45;
+  --green-pale:#e6f4ec;
+  --orange:    #E65C00;
+  --gold:      #d4a017;
+  --gray:      #8a827a;
+  --bg:        #f4f6fb;
+  --surface:   #ffffff;
+  --surface2:  #f0f3fa;
+  --ink:       #1a1d2e;
+  --ink2:      #3a3f52;
+  --ink3:      #737A94;
+  --ink4:      #adb5c8;
+  --border:    rgba(0,0,0,0.10);
+  --border2:   rgba(0,0,0,0.18);
+  --r:         10px;
+  --rs:        8px;
+  --shadow:    0 2px 12px rgba(0,61,165,0.08);
+  --shadow-md: 0 4px 20px rgba(0,61,165,0.13);
+  --font-head: 'Montserrat', sans-serif;
+  --font:      'Open Sans', sans-serif;
+  --sbt:       env(safe-area-inset-bottom, 0px);
+  --stt:       env(safe-area-inset-top, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+/* ── LAYOUT ── */
+#app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; background: var(--bg); }
+
+/* ── HEADER — CRM lacivert sidebar rengi ── */
+.hdr {
+  background: var(--navy);
+  padding: calc(var(--stt) + 12px) 16px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: relative; z-index: 10; flex-shrink: 0;
+}
+.hdr-brand { display: flex; align-items: center; gap: 10px; }
+.hdr-badge {
+  background: var(--red); color: #fff;
+  font-family: var(--font-head); font-size: 9px; font-weight: 800;
+  padding: 2px 5px; border-radius: 3px; letter-spacing: 0.05em;
+  line-height: 1.4; flex-shrink: 0;
+}
+.hdr-title { color: #fff; font-family: var(--font-head); font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.hdr-sub   { color: rgba(255,255,255,0.65); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
+.hdr-right { display: flex; gap: 6px; }
+.hdr-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; color: #fff; position: relative;
+  transition: background 0.15s;
+}
+.hdr-btn:active { background: rgba(255,255,255,0.25); }
+.bcnt {
+  position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px;
+  background: var(--red); border-radius: 9px; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  border: 2px solid var(--navy); padding: 0 3px;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── HOME ── */
+.home-greeting { padding: 18px 16px 10px; }
+.home-date-lbl { font-size: 11px; color: var(--ink3); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.home-greeting h2 { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--ink); }
+.home-greeting p  { font-size: 13px; color: var(--ink3); margin-top: 3px; }
+
+/* ── SENARYO KARTLARI ── */
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px 14px; }
+.sc {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 14px 14px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: var(--shadow);
+  -webkit-user-select: none; user-select: none;
+}
+.sc:active { transform: scale(0.96); box-shadow: none; }
+.sc-stripe { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.sc-ic { font-size: 22px; margin-bottom: 10px; display: block; }
+.sc h3 { font-family: var(--font-head); font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.sc p  { font-size: 11px; color: var(--ink3); margin-top: 3px; }
+
+/* Kişi görüşme tek satır kart */
+.sc-wide {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 13px 14px;
+  cursor: pointer; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow); margin: 0 16px 14px;
+  position: relative; overflow: hidden;
+  transition: transform 0.12s; -webkit-user-select: none; user-select: none;
+}
+.sc-wide:active { transform: scale(0.98); }
+.sc-wide-ic { font-size: 20px; flex-shrink: 0; }
+.sc-wide h3 { font-family: var(--font-head); font-size: 12px; font-weight: 700; color: var(--ink); }
+.sc-wide p  { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.sc-wide-arr { margin-left: auto; color: var(--ink4); font-size: 14px; flex-shrink: 0; }
+
+/* ── KAYITLAR ── */
+.sec-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 8px; }
+.sec-head h4 { font-size: 11px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.07em; }
+.sec-head span { font-size: 11px; color: var(--ink3); }
+.rlist { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
+.ri {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; box-shadow: var(--shadow);
+  transition: transform 0.1s;
+}
+.ri:active { transform: scale(0.99); }
+.rdot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.rinfo { flex: 1; min-width: 0; }
+.rinfo .rn { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rinfo .rs { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.rt { font-size: 11px; color: var(--ink4); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.empty { text-align: center; color: var(--ink4); font-size: 13px; padding: 24px 0; }
+
+/* ── EXPORT BUTONU ── */
+.exp-bar { margin: 6px 16px 14px; }
+.exp-btn {
+  width: 100%; background: var(--navy); border: none;
+  border-radius: var(--r); padding: 13px 16px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); box-shadow: var(--shadow-md);
+  transition: opacity 0.15s;
+}
+.exp-btn:active { opacity: 0.85; }
+.exp-cnt { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 4px; }
+
+#install-btn {
+  width: 100%; background: transparent; border: 1.5px solid var(--navy);
+  border-radius: var(--r); padding: 11px 16px; color: var(--navy);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); display: none;
+  align-items: center; justify-content: center; gap: 8px;
+  margin: 0 16px 14px; width: calc(100% - 32px);
+}
+
+.bpad { height: calc(16px + var(--sbt)); }
+
+/* ── FORM SCREENS ── */
+.fhdr {
+  background: var(--surface); border-bottom: 1.5px solid var(--border);
+  padding: 10px 16px 12px;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.bbtn {
+  width: 34px; height: 34px; border-radius: var(--rs);
+  background: var(--surface2); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; color: var(--ink3); flex-shrink: 0;
+  transition: background 0.15s;
+}
+.bbtn:active { background: var(--navy-pale); }
+.fhi { flex: 1; min-width: 0; }
+.fhi h2 { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--ink); }
+.fhi p  { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.fpill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; letter-spacing: 0.03em; }
+
+/* ── FORM BODY ── */
+.fbody { padding: 14px 16px 100px; display: flex; flex-direction: column; gap: 14px; }
+.fsec { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+.fsec-label { font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 11px; font-weight: 600; color: var(--ink3); letter-spacing: 0.03em; }
+.fg input, .fg textarea, .fg select {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--rs); color: var(--ink);
+  font-size: 14px; font-family: var(--font);
+  padding: 10px 12px; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.fg input:focus, .fg textarea:focus, .fg select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(0,61,165,0.10);
+}
+.fg textarea { resize: none; min-height: 72px; line-height: 1.5; }
+.fg select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23737A94' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-color: var(--bg);
+  padding-right: 34px; cursor: pointer;
+}
+.fg input::placeholder, .fg textarea::placeholder { color: var(--ink4); }
+
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.frow .fg { margin: 0; }
+
+.fdiv { font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.fdiv::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── CHİPLER — CRM pbtn stili ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 5px 13px;
+  font-size: 12px; color: var(--ink3); cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+  -webkit-user-select: none; user-select: none; font-weight: 500;
+}
+.chip:active { transform: scale(0.96); }
+.chip.on {
+  background: var(--navy); border-color: var(--navy);
+  color: #fff; font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,61,165,0.25);
+}
+
+/* ── SOKAK KARTLARI ── */
+.skcard {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 12px; margin-bottom: 0;
+}
+.skhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.skhead span { font-size: 12px; font-weight: 700; color: var(--green); font-family: var(--font-head); }
+.skhead button { font-size: 11px; color: var(--red); background: none; border: none; cursor: pointer; font-family: var(--font); font-weight: 600; }
+.add-sk {
+  width: 100%; border: 2px dashed var(--border2);
+  background: transparent; border-radius: var(--rs);
+  padding: 10px; color: var(--ink3); font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--font); font-weight: 600; transition: all 0.15s;
+}
+.add-sk:active { border-color: var(--navy); color: var(--navy); }
+
+/* ── KAYDET ÇUBUĞU ── */
+.savebar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  padding: 10px 16px calc(10px + var(--sbt));
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  z-index: 20;
+}
+.savebtn {
+  width: 100%; padding: 14px; border-radius: var(--r);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; color: white; font-family: var(--font-head);
+  letter-spacing: 0.01em; transition: opacity 0.12s, transform 0.1s;
+  box-shadow: var(--shadow-md);
+}
+.savebtn:active { opacity: 0.85; transform: scale(0.99); }
+.btn-navy  { background: var(--navy); }
+.btn-red   { background: var(--red); }
+.btn-green { background: var(--green); }
+.btn-orange{ background: var(--orange); }
+.btn-blue  { background: #1a5fa0; }
+
+/* ── DETAIL MODAL ── */
+.dmodal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50; display: none; align-items: flex-end; }
+.dmodal.open { display: flex; }
+.dsheet {
+  background: var(--surface); border-radius: 18px 18px 0 0;
+  padding: 20px 16px calc(24px + var(--sbt));
+  width: 100%; max-width: 480px; margin: 0 auto;
+  max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.12);
+}
+.dhandle { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
+.dtitle { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
+.drow { display: flex; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.drow:last-child { border: none; }
+.dlbl { font-size: 12px; color: var(--ink3); width: 110px; flex-shrink: 0; line-height: 1.5; font-weight: 500; }
+.dval { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; line-height: 1.5; word-break: break-word; }
+.dclose {
+  width: 100%; margin-top: 14px; padding: 12px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r); color: var(--ink3); font-size: 14px;
+  cursor: pointer; font-family: var(--font); font-weight: 600;
+}
+
+/* ── EXPORT SCREEN ── */
+.import-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; background: var(--surface2); margin-bottom: 5px; border: 1px solid var(--border); }
+
+/* ── INFO KUTUSU ── */
+.info-box {
+  background: var(--navy-pale); border: 1px solid rgba(0,61,165,0.2);
+  border-radius: var(--rs); padding: 10px 13px;
+  font-size: 12px; color: var(--ink2); line-height: 1.6;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: calc(80px + var(--sbt)); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green); color: white;
+  border-radius: var(--r); padding: 11px 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap; z-index: 100; pointer-events: none;
+  font-family: var(--font); box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err  { background: var(--red); }
+.toast.warn { background: var(--orange); }
+
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <div class="hdr">
+    <div class="hdr-brand">
+      <span class="hdr-badge">RE/MAX</span>
+      <div>
+        <div class="hdr-title">Saha CRM</div>
+        <div class="hdr-sub">Veri Toplama Asistanı</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-btn" onclick="showExport()" title="Dışa aktar">
+        📤<span class="bcnt" id="rec-badge" style="display:none">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ HOME ════ -->
+  <div class="screen active" id="s-home">
+    <div class="home-greeting">
+      <div class="home-date-lbl" id="home-date"></div>
+      <h2>Merhaba 👋</h2>
+      <p>Hangi veriyi kaydetmek istiyorsunuz?</p>
+    </div>
+
+    <div class="sgrid">
+      <div class="sc" onclick="goTo('esnaf')">
+        <div class="sc-stripe" style="background:var(--navy)"></div>
+        <span class="sc-ic">🏪</span>
+        <h3>Esnaf Görüşmesi</h3>
+        <p>Piyasa & işletme notu</p>
+      </div>
+      <div class="sc" onclick="goTo('musteri')">
+        <div class="sc-stripe" style="background:var(--red)"></div>
+        <span class="sc-ic">👤</span>
+        <h3>Kişi / Müşteri</h3>
+        <p>CRM kişi kaydı</p>
+      </div>
+      <div class="sc" onclick="goTo('portfoy')">
+        <div class="sc-stripe" style="background:var(--green)"></div>
+        <span class="sc-ic">🏠</span>
+        <h3>Portföy İlanı</h3>
+        <p>Satılık & kiralık mülk</p>
+      </div>
+      <div class="sc" onclick="goTo('mahalle')">
+        <div class="sc-stripe" style="background:var(--orange)"></div>
+        <span class="sc-ic">🗺</span>
+        <h3>Mahalle Notu</h3>
+        <p>Bölge & sokak analizi</p>
+      </div>
+    </div>
+
+    <div class="sc-wide" onclick="goTo('gorusme')">
+      <div class="sc-stripe" style="background:#1a5fa0;height:100%;width:3px;border-radius:3px 0 0 3px;position:absolute;left:0;top:0;"></div>
+      <span class="sc-wide-ic">📞</span>
+      <div><h3>Görüşme Notu</h3><p>Mevcut müşteriyle görüşme kaydet</p></div>
+      <span class="sc-wide-arr">›</span>
+    </div>
+
+    <div class="sec-head">
+      <h4>Son Kayıtlar</h4>
+      <span id="rec-count-lbl">0 kayıt</span>
+    </div>
+    <div class="rlist" id="home-records">
+      <div class="empty">Henüz kayıt yok</div>
+    </div>
+
+    <div class="exp-bar">
+      <button class="exp-btn" onclick="showExport()">
+        <span>📤</span>
+        <span>JSON Dışa Aktar — CRM Import</span>
+        <span class="exp-cnt" id="exp-cnt-lbl">0</span>
+      </button>
+    </div>
+    <button id="install-btn" onclick="pwaInstall()">📲 Ana Ekrana Ekle</button>
+    <div class="bpad"></div>
+  </div>
+
+  <!-- ════ ESNAF ════ -->
+  <div class="screen" id="s-esnaf">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Esnaf Görüşmesi</h2><p>Piyasa bilgisi ve işletme notu</p></div>
+      <span class="fpill" style="background:var(--navy-pale);color:var(--navy);">Etki Çevresi</span>
+    </div>
+    <div class="fbody">
+      <div class="info-box">ℹ️ Esnaf kaydı CRM'e <strong>Etki Çevresi</strong> tipinde Kişi olarak aktarılır.</div>
+      <div class="fsec">
+        <div class="fsec-label">İşletme Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>İşletme Adı *</label><input type="text" id="e-isletme" placeholder="Şirket veya dükkan adı" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Yetkili Kişi</label><input type="text" id="e-yetkili" placeholder="Ad Soyad" autocomplete="off"></div>
+            <div class="fg"><label>Telefon</label><input type="tel" id="e-tel" placeholder="05__"></div>
+          </div>
+          <div class="fg"><label>İş Tipi</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'e-istip')">Market / Bakkal</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Restoran / Kafe</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Tekstil / Butik</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Berber / Kuaför</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Eczane</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Kırtasiye</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Diğer</div>
+            </div>
+            <input type="hidden" id="e-istip">
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Mülkiyet & Kira</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>İşletme Mülkiyet Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-kira-durum')">Kendi Mülkü</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum')">Kiracı</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum')">Bilinmiyor</div>
+            </div>
+            <input type="hidden" id="e-kira-durum">
+          </div>
+          <div class="fg"><label>Tahmini Kira (₺/ay)</label><input type="number" id="e-kira-bedel" placeholder="Boş bırakılabilir" inputmode="numeric"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Piyasa Bilgisi</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Bölge Piyasası Yorumları</label>
+            <textarea id="e-piyasa" placeholder="Kira fiyatları, müşteri yoğunluğu, doluluk oranı..."></textarea>
+          </div>
+          <div class="fg"><label>Notlarım</label>
+            <textarea id="e-not" placeholder="Kişisel gözlem, takip notu, fırsat..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-navy" onclick="save_('esnaf')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ MÜŞTERİ ════ -->
+  <div class="screen" id="s-musteri">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Kişi / Müşteri</h2><p>CRM ile birebir uyumlu</p></div>
+      <span class="fpill" style="background:var(--red-pale);color:var(--red);">Kişi</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Temel Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Ad Soyad *</label><input type="text" id="m-ad" placeholder="Ad Soyad" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Telefon</label><input type="tel" id="m-tel" placeholder="05__"></div>
+            <div class="fg"><label>E-posta</label><input type="email" id="m-email" placeholder="mail@örnek.com"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Meslek</label><input type="text" id="m-meslek" placeholder="Meslek / Sektör" autocomplete="off"></div>
+            <div class="fg"><label>Sosyal Medya</label><input type="text" id="m-sosyal" placeholder="@instagram" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">CRM Sınıflandırması</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Pipeline</label>
+            <select id="m-pipe">
+              <option>Potansiyel</option><option>İlk Görüşme</option><option>Aktif Arama</option>
+              <option>Değerleme Yapıldı</option><option>Yetki Alındı</option>
+              <option>Teklif Verildi</option><option>Kapandı</option>
+            </select>
+          </div>
+          <div class="fg"><label>Kişi Tipi *</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Alıcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Satıcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Kiracı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Mülk Sahibi</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Yatırımcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Kurumsal</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Müteahhit</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Danışman</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Etki Çevresi</div>
+            </div>
+            <input type="hidden" id="m-tip">
+          </div>
+          <div id="m-ek"></div>
+          <div class="fg"><label>Etiket</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'m-etiket')">🔥 Sıcak</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">⭐ VIP</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">⏳ Bekliyor</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">❄️ Soğuk</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">🚨 Acil</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">👥 Referans</div>
+            </div>
+            <input type="hidden" id="m-etiket">
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Kaynak & Notlar</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Tercih İletişim</label>
+            <select id="m-ilet">
+              <option value="">—</option>
+              <option>Telefon</option><option>WhatsApp</option><option>E-posta</option><option>Yüz Yüze</option>
+            </select>
+          </div>
+          <div class="fg"><label>Referans Kaynağı</label>
+            <select id="m-ref">
+              <option value="">—</option>
+              <optgroup label="Dijital">
+                <option>Instagram</option><option>Facebook</option><option>LinkedIn</option>
+                <option>Sahibinden</option><option>Hepsiemlak</option><option>Emlakjet</option><option>RE/MAX Sitesi</option>
+              </optgroup>
+              <optgroup label="Saha / Doğrudan">
+                <option>FSBO - Kapı Çalma</option><option>FSBO - Sahibinden İlanı</option>
+                <option>FSBO - Sosyal Medya İlanı</option><option>FSBO - Pano/Tabela</option>
+                <option>Soğuk Arama</option><option>Ofis Walk-in</option>
+              </optgroup>
+              <optgroup label="Referans / Çevre">
+                <option>Referans Müşteri</option><option>Etki Çevresi</option><option>Eski Müşteri</option>
+              </optgroup>
+              <optgroup label="Diğer"><option>Diğer</option></optgroup>
+            </select>
+          </div>
+          <div class="fg"><label>Genel Notlar</label>
+            <textarea id="m-not" placeholder="Özel durum, kişisel notlar..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-red" onclick="save_('musteri')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ PORTFÖY ════ -->
+  <div class="screen" id="s-portfoy">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Portföy İlanı</h2><p>Mülk kaydı</p></div>
+      <span class="fpill" style="background:var(--green-pale);color:var(--green);">Portföy</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Mülk Adı</div>
+        <div class="fg"><input type="text" id="p-ad" placeholder="Örn: Kadıköy 3+1 Deniz Manzaralı" autocomplete="off"></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Konum</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>İlçe / Bölge</label><input type="text" id="p-bolge" placeholder="Kadıköy" autocomplete="off"></div>
+            <div class="fg"><label>Mahalle</label><input type="text" id="p-mahalle" placeholder="Moda Mah." autocomplete="off"></div>
+          </div>
+          <div class="fg"><label>Sokak / Cadde</label><input type="text" id="p-sokak" placeholder="Bahariye Cad. No:12" autocomplete="off"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">İlan Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Portföy Kategorisi</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Yetkili Portföyüm</div>
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Sahibinden İlanı</div>
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Danışman Portföyü</div>
+            </div>
+            <input type="hidden" id="p-kategori">
+          </div>
+          <div class="fg" id="p-danisman-alani" style="display:none">
+            <label>Danışman Adı</label>
+            <input type="text" id="p-danisman-ad" placeholder="Danışmanın adı soyadı" autocomplete="off">
+          </div>
+          <div class="fg"><label>İlan Linki (opsiyonel)</label><input type="text" id="p-ilan-link" placeholder="https://www.sahibinden.com/ilan/..." autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>İlan Tipi</label>
+              <div class="chips">
+                <div class="chip" onclick="selChip(this,'p-tip')">Satılık</div>
+                <div class="chip" onclick="selChip(this,'p-tip')">Kiralık</div>
+              </div>
+              <input type="hidden" id="p-tip">
+            </div>
+            <div class="fg"><label>Konut Tipi</label>
+              <select id="p-ktipi">
+                <option value="">—</option>
+                <option>Apartman Dairesi</option><option>Site Dairesi</option><option>Müstakil Ev</option>
+                <option>Villa</option><option>Çatı Katı</option><option>Bahçe Katı</option>
+                <option>Dükkan / Ofis</option><option>Arsa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Detay Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>Fiyat (₺)</label><input type="number" id="p-fiyat" placeholder="0" inputmode="numeric"></div>
+            <div class="fg"><label>Alan (m²)</label><input type="number" id="p-alan" placeholder="0" inputmode="numeric"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Oda Sayısı</label>
+              <select id="p-oda">
+                <option value="">—</option>
+                <option>Stüdyo</option><option>1+0</option><option>1+1</option><option>2+1</option>
+                <option>3+1</option><option>4+1</option><option>4+2</option><option>5+1</option>
+              </select>
+            </div>
+            <div class="fg"><label>Bina Yaşı</label><input type="text" id="p-byasi" placeholder="0-5 yıl"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Kat</label><input type="text" id="p-kat" placeholder="3/8" autocomplete="off"></div>
+            <div class="fg"><label>Cephe</label>
+              <select id="p-cephe">
+                <option value="">—</option>
+                <option>Kuzey</option><option>Güney</option><option>Doğu</option><option>Batı</option><option>Kuzey-Güney</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Isıtma</label>
+              <select id="p-isitma">
+                <option value="">—</option>
+                <option>Doğalgaz (Kombi)</option><option>Merkezi</option><option>Yerden Isıtma</option><option>Klima</option><option>Soba</option>
+              </select>
+            </div>
+            <div class="fg"><label>Tapu Tipi</label>
+              <select id="p-tapu">
+                <option value="">—</option>
+                <option>Kat Mülkiyeti</option><option>Kat İrtifakı</option><option>Hisseli Tapu</option><option>Arsa Tapusu</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Özellikler</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Asansör</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Otopark</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Balkon</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Güvenlik</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Isı Yalıtım</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Ses Yalıtım</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Ebeveyn B.</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Amerikan Mutfak</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Havuz</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Spor Salonu</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Deniz Manzarası</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Bahçe</div>
+            </div>
+            <input type="hidden" id="p-ozellik">
+          </div>
+          <div class="fg"><label>Mülk Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'p-durum')">Aktif</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Opsiyonlu</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Satıldı</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Kiralandı</div>
+            </div>
+            <input type="hidden" id="p-durum">
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Yetki</div>
+        <div class="frow">
+          <div class="fg"><label>Yetki Başlangıcı</label><input type="date" id="p-yetki-bas"></div>
+          <div class="fg"><label>Yetki Bitişi</label><input type="date" id="p-yetki-bit"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Açıklama & Notlar</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Açıklama</label><textarea id="p-acik" placeholder="İlan metni, öne çıkan özellikler..."></textarea></div>
+          <div class="fg"><label>Notlarım</label><textarea id="p-not" placeholder="Kişisel notlar, eşleştirme fikirleri..."></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-green" onclick="save_('portfoy')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ MAHALLE ════ -->
+  <div class="screen" id="s-mahalle">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Mahalle Notu</h2><p>CRM Bölge Analizi → Saha Notları</p></div>
+      <span class="fpill" style="background:#fff3e0;color:var(--orange);">Bölge</span>
+    </div>
+    <div class="fbody">
+      <div class="info-box">ℹ️ Bu kayıt CRM'in <strong>Bölge Analizi → Saha Notları</strong> bölümüne aktarılır.</div>
+      <div class="fsec">
+        <div class="fsec-label">Genel Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>Mahalle Adı *</label><input type="text" id="mh-mahalle" placeholder="Mahalle" autocomplete="off"></div>
+            <div class="fg"><label>İlçe</label><input type="text" id="mh-ilce" placeholder="İlçe" autocomplete="off"></div>
+          </div>
+          <div class="fg"><label>İmar Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'mh-imar')">Konut</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Ticari</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Karma</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Belirsiz</div>
+            </div>
+            <input type="hidden" id="mh-imar">
+          </div>
+          <div class="fg"><label>Bina Yapısı</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'mh-bina')">Müstakil</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Apartman</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Site / Rezidans</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Karma</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Eski Bina Ağırlıklı</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Yeni Bina Ağırlıklı</div>
+            </div>
+            <input type="hidden" id="mh-bina">
+          </div>
+          <div class="fg"><label>Genel Notlar</label>
+            <textarea id="mh-not" placeholder="Fiyat eğilimi, gelişim potansiyeli, dikkat noktaları..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Sokak Detayları</div>
+        <div id="sklar-c" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button class="add-sk" onclick="addSokak()" style="margin-top:8px">＋ Sokak Ekle</button>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-orange" onclick="save_('mahalle')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ GÖRÜŞME ════ -->
+  <div class="screen" id="s-gorusme">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Görüşme Notu</h2><p>CRM görüşme kaydı</p></div>
+      <span class="fpill" style="background:#e8f0fb;color:#1a5fa0;">Görüşme</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Görüşme Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Müşteri Adı *</label><input type="text" id="g-musteri" placeholder="Ad Soyad" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Görüşme Tipi</label>
+              <select id="g-tip">
+                <option>Telefon</option><option>WhatsApp</option>
+                <option>Yüz Yüze</option><option>E-posta</option><option>Saha Ziyareti</option>
+              </select>
+            </div>
+            <div class="fg"><label>İlgi Seviyesi</label>
+              <select id="g-ilgi">
+                <option>🔥 Çok Sıcak</option><option>✅ İlgili</option>
+                <option>🤔 Kararsız</option><option>❄️ Soğuk</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Tarih & Saat</label><input type="datetime-local" id="g-tarih"></div>
+          <div class="fg"><label>İlgili Mülk (opsiyonel)</label><input type="text" id="g-mulk" placeholder="Mülk adı veya adresi" autocomplete="off"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Not & Takip</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Görüşme Notu</label><textarea id="g-not" placeholder="Görüşmede konuşulanlar, müşteri talepleri..."></textarea></div>
+          <div class="fg"><label>Sonraki Adım</label><input type="text" id="g-adim" placeholder="Fiyat araştır, randevu ayarla..." autocomplete="off"></div>
+          <div class="fg"><label>Hatırlatıcı (opsiyonel)</label><input type="datetime-local" id="g-hat"></div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-blue" onclick="save_('gorusme')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ EXPORT ════ -->
+  <div class="screen" id="s-export">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Dışa Aktarma</h2><p>CRM import için JSON</p></div>
+    </div>
+    <div class="fbody" id="export-body"></div>
+    <div class="bpad"></div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="dmodal" id="dmodal" onclick="closeDM(event)">
+    <div class="dsheet" id="dsheet">
+      <div class="dhandle"></div>
+      <div class="dtitle" id="dtitle">Kayıt Detayı</div>
+      <div id="dbody"></div>
+      <button class="dclose" onclick="closeDMbtn()">Kapat</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// VERİ & SABİTLER
+// ══════════════════════════════════════════
+var DB = JSON.parse(localStorage.getItem('saha_crm_v2') || '[]');
+var skCnt = 0;
+var curScr = 'home';
+var _deferredPrompt = null;
+
+var TIP_RENK = { esnaf:'#003DA5', musteri:'#CC0000', portfoy:'#1A7A45', mahalle:'#E65C00', gorusme:'#1a5fa0' };
+var TIP_LBL  = { esnaf:'Esnaf', musteri:'Kişi', portfoy:'Portföy', mahalle:'Mahalle', gorusme:'Görüşme' };
+var ETIK_MAP = { '🔥 Sıcak':'sicak','⭐ VIP':'vip','⏳ Bekliyor':'bekliyor','❄️ Soğuk':'soguk','🚨 Acil':'acil','👥 Referans':'referans' };
+
+var KISI_EK = {
+  'Alıcı':       [{id:'m-butce',    l:'Min Bütçe (₺)',         t:'number',ph:'3000000'},
+                  {id:'m-t-bolge',  l:'Tercih Bölge',           t:'text',  ph:'Kadıköy...'},
+                  {id:'m-t-oda',    l:'Tercih Oda',             t:'text',  ph:'3+1, 4+1'}],
+  'Kiracı':      [{id:'m-kira-max', l:'Max Kira Bütçesi (₺)',  t:'number',ph:'15000'},
+                  {id:'m-t-bolge',  l:'Tercih Bölge',           t:'text',  ph:'Kadıköy...'},
+                  {id:'m-kira-tar', l:'Taşınma Tarihi',         t:'date',  ph:''}],
+  'Satıcı':      [{id:'m-mulk-adr', l:'Mülk Adresi',           t:'text',  ph:'Kadıköy Mah.'},
+                  {id:'m-beklenti', l:'Fiyat Beklentisi (₺)',   t:'number',ph:'8500000'},
+                  {id:'m-sat-sure', l:'Satış Hedef Süresi',     t:'text',  ph:'3 ay'}],
+  'Mülk Sahibi': [{id:'m-mulk-adr', l:'Mülk Adresi',           t:'text',  ph:'Kadıköy Mah.'},
+                  {id:'m-deg-bkl',  l:'Değer Beklentisi (₺)',   t:'number',ph:'8000000'},
+                  {id:'m-deg-tar',  l:'Değerleme Tarihi',       t:'date',  ph:''}],
+  'Yatırımcı':   [{id:'m-yat-btc',  l:'Yatırım Bütçesi (₺)',   t:'number',ph:'5000000'},
+                  {id:'m-yat-amc',  l:'Yatırım Amacı',          t:'text',  ph:'Kira getirisi...'},
+                  {id:'m-yat-vad',  l:'Yatırım Vadesi',         t:'text',  ph:'5 yıl'}],
+  'Kurumsal':    [{id:'m-firma',    l:'Firma Adı',              t:'text',  ph:'ABC Şirketi A.Ş.'},
+                  {id:'m-vergi',    l:'Vergi No',               t:'text',  ph:'1234567890'},
+                  {id:'m-yetkili',  l:'Yetkili Kişi',           t:'text',  ph:'Mehmet Yılmaz'}],
+  'Müteahhit':   [{id:'m-firma',    l:'Firma / İnşaat Şirketi', t:'text',  ph:'XYZ İnşaat Ltd.'},
+                  {id:'m-prj-say',  l:'Aktif Proje Sayısı',     t:'number',ph:'3'},
+                  {id:'m-paylasim', l:'Paylaşım Tipi',          t:'text',  ph:'Satış paylaşımı'}],
+  'Danışman':    [{id:'m-ofis',     l:'Emlak Ofisi',            t:'text',  ph:'RE/MAX...'},
+                  {id:'m-sicil',    l:'Sicil / Lisans No',      t:'text',  ph:'TSKB12345'},
+                  {id:'m-pay-blg',  l:'Paylaşım Bölgesi',       t:'text',  ph:'Anadolu Yakası'}],
+  'Etki Çevresi':[{id:'m-iliski',   l:'İlişki Türü',            t:'text',  ph:'Arkadaş, Komşu...'},
+                  {id:'m-sektor',   l:'Meslek / Sektör',        t:'text',  ph:'Doktor, Öğretmen...'},
+                  {id:'m-potan',    l:'Potansiyel',             t:'text',  ph:'Yatırım düşünüyor'}]
+};
+
+var LABELS = {
+  ad:'Ad Soyad', tel:'Telefon', email:'E-posta', meslek:'Meslek', sosyal:'Sosyal Medya',
+  tip:'Tip', pipeline:'Pipeline', referans:'Referans', iletisim:'Tercih İletişim', not:'Notlar',
+  bolge:'Bölge', mahalle:'Mahalle', sokak:'Sokak', ktipi:'Konut Tipi',
+  fiyat:'Fiyat (₺)', alan:'Alan (m²)', oda:'Oda', byasi:'Bina Yaşı', kat:'Kat',
+  cephe:'Cephe', isitma:'Isıtma', tapu:'Tapu Tipi', ozellikler:'Özellikler',
+  durum:'Durum', yetkiBas:'Yetki Baş.', yetkiBit:'Yetki Bit.', acik:'Açıklama',
+  kategori:'Portföy Kat.', ilanLink:'İlan Linki', _danisman_ad:'Danışman (Metin)',
+  imar_durumu:'İmar', bina_yapisi:'Bina Yapısı', genel_not:'Genel Not',
+  musteri:'Müşteri', ilgi:'İlgi Seviyesi', tarih:'Tarih',
+  mulk:'Mülk', adim:'Sonraki Adım', hat:'Hatırlatıcı',
+  ilce:'İlçe', butce:'Bütçe', tercih_bolge:'Tercih Bölge', tercih_oda:'Tercih Oda',
+  kira_max:'Max Kira', mulk_adres:'Mülk Adresi', beklenti:'Fiyat Beklenti',
+  firma:'Firma', vergi_no:'Vergi No', yetkili:'Yetkili',
+  iliski:'İlişki Türü', sektor:'Sektör', potansiyel:'Potansiyel',
+  _esnaf_kira_durum:'Mülkiyet', _esnaf_kira_bedel:'Kira (₺)', _esnaf_piyasa:'Piyasa Yorumu'
+};
+var SKIP = ['_id','_tip','_zaman','_zamanTR','_tarih','_label','_crm_kategori','etiketler','sokaklar','_notlar'];
+
+// ══════════════════════════════════════════
+// NAVİGASYON
+// ══════════════════════════════════════════
+function goTo(scr) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+scr).classList.add('active');
+  curScr = scr;
+  if(scr==='gorusme'){
+    var n=new Date(), p=n=>String(n).padStart(2,'0');
+    document.getElementById('g-tarih').value = n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());
+  }
+}
+function goBack(){ goTo('home'); renderHome(); }
+function showExport(){ goTo('export'); renderExport(); }
+
+// ══════════════════════════════════════════
+// CHİP HELPERLERİ
+// ══════════════════════════════════════════
+function togChip(el, hid) {
+  el.classList.toggle('on');
+  if(navigator.vibrate) navigator.vibrate(8);
+  document.getElementById(hid).value = Array.from(el.parentElement.querySelectorAll('.chip.on')).map(c=>c.textContent).join(', ');
+}
+function selChip(el, hid) {
+  el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  if(navigator.vibrate) navigator.vibrate(8);
+  document.getElementById(hid).value = el.textContent;
+}
+
+// ══════════════════════════════════════════
+// DİNAMİK ALANLAR
+// ══════════════════════════════════════════
+function updMTip() {
+  var tip = document.getElementById('m-tip').value;
+  var c   = document.getElementById('m-ek');
+  var al  = KISI_EK[tip]||[];
+  if(!al.length){ c.innerHTML=''; return; }
+  c.innerHTML = '<div class="fdiv" style="margin-top:4px">'+tip+' Detayları</div>'
+    + al.map(a=>'<div class="fg" style="margin-top:8px"><label>'+a.l+'</label><input type="'+a.t+'" id="'+a.id+'" placeholder="'+a.ph+'" autocomplete="off"></div>').join('');
+}
+function updPKat() {
+  var val = document.getElementById('p-kategori').value;
+  var alan = document.getElementById('p-danisman-alani');
+  if(alan) alan.style.display = val==='Danışman Portföyü' ? '' : 'none';
+}
+
+// ══════════════════════════════════════════
+// SOKAK
+// ══════════════════════════════════════════
+function addSokak() {
+  skCnt++;
+  var n=skCnt, c=document.getElementById('sklar-c'), div=document.createElement('div');
+  div.className='skcard'; div.id='sk-'+n;
+  div.innerHTML=`<div class="skhead"><span>Sokak ${n}</span><button onclick="document.getElementById('sk-${n}').remove()">✕ Sil</button></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="fg"><label>Sokak Adı</label><input type="text" class="sk-ad" placeholder="Sokak / Cadde adı" autocomplete="off"></div>
+      <div class="frow">
+        <div class="fg"><label>Manzara</label><select class="sk-mzr"><option value="">—</option><option>Deniz / Boğaz</option><option>Yeşil Alan</option><option>Şehir</option><option>İç Avlu</option><option>Karışık</option></select></div>
+        <div class="fg"><label>Trafik / Park</label><select class="sk-trf"><option value="">—</option><option>Sakin / Kolay Park</option><option>Orta Yoğunluk</option><option>Yoğun / Zor Park</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Yeşil Alan</label><select class="sk-ysl"><option value="">—</option><option>Yok</option><option>Az</option><option>Orta</option><option>Bol</option></select></div>
+        <div class="fg"><label>Toplu Taşıma</label><select class="sk-uls"><option value="">—</option><option>Yakın (yürüme)</option><option>Orta Mesafe</option><option>Uzak</option></select></div>
+      </div>
+      <div class="fg"><label>Temel İhtiyaç Noktaları</label><input type="text" class="sk-iht" placeholder="Market, eczane, okul..." autocomplete="off"></div>
+      <div class="fg"><label>Sokak Notu</label><input type="text" class="sk-not" placeholder="Bu sokakla ilgili notunuz" autocomplete="off"></div>
+    </div>`;
+  c.appendChild(div);
+}
+
+// ══════════════════════════════════════════
+// KAYIT
+// ══════════════════════════════════════════
+function v(id){ var e=document.getElementById(id); return e?e.value:''; }
+
+function save_(tip) {
+  var now=new Date();
+  var d={ _id:tip.charAt(0)+Date.now(), _tip:tip, _zaman:now.toISOString(), _zamanTR:now.toLocaleString('tr-TR'), _tarih:now.toLocaleDateString('tr-TR') };
+
+  if(tip==='esnaf') {
+    if(!v('e-isletme').trim()){ toast('İşletme adı zorunlu!','err'); return; }
+    d.ad=v('e-isletme').trim(); d.tel=v('e-tel'); d.tip='Etki Çevresi';
+    d.meslek=v('e-istip'); d.iliski='Esnaf'; d.pipeline='İlk Görüşme';
+    var np=['[ESNAF]'];
+    if(v('e-yetkili'))    np.push('Yetkili: '+v('e-yetkili'));
+    if(v('e-kira-durum')) np.push('Mülkiyet: '+v('e-kira-durum'));
+    if(v('e-kira-bedel')) np.push('Kira: ₺'+v('e-kira-bedel'));
+    if(v('e-piyasa'))     np.push('Piyasa: '+v('e-piyasa'));
+    if(v('e-not'))        np.push('Not: '+v('e-not'));
+    d.not=np.join(' | ');
+    d._esnaf_kira_durum=v('e-kira-durum'); d._esnaf_kira_bedel=v('e-kira-bedel'); d._esnaf_piyasa=v('e-piyasa');
+    d._label=d.ad;
+    clearF(['e-isletme','e-yetkili','e-tel','e-kira-bedel','e-piyasa','e-not','e-istip','e-kira-durum'],'esnaf');
+
+  } else if(tip==='musteri') {
+    if(!v('m-ad').trim()){ toast('Ad Soyad zorunlu!','err'); return; }
+    d.ad=v('m-ad').trim(); d.tel=v('m-tel'); d.email=v('m-email');
+    d.meslek=v('m-meslek'); d.sosyal=v('m-sosyal'); d.tip=v('m-tip');
+    d.pipeline=v('m-pipe'); d.referans=v('m-ref'); d.iletisim=v('m-ilet');
+    d.not=v('m-not');
+    var etl=v('m-etiket'); d.etiketler=etl?[ETIK_MAP[etl]||etl]:[];
+    var ekMap={'Alıcı':{butce:'m-butce',tercih_bolge:'m-t-bolge',tercih_oda:'m-t-oda'},'Kiracı':{kira_max:'m-kira-max',tercih_bolge:'m-t-bolge',tasima_tarihi:'m-kira-tar'},'Satıcı':{mulk_adres:'m-mulk-adr',beklenti:'m-beklenti',satis_sure:'m-sat-sure'},'Mülk Sahibi':{mulk_adres:'m-mulk-adr',deger_beklenti:'m-deg-bkl',deger_tarihi:'m-deg-tar'},'Yatırımcı':{butce:'m-yat-btc',yatirim_amac:'m-yat-amc',yatirim_sure:'m-yat-vad'},'Kurumsal':{firma:'m-firma',vergi_no:'m-vergi',yetkili:'m-yetkili'},'Müteahhit':{firma:'m-firma',proje_sayisi:'m-prj-say',paylasim:'m-paylasim'},'Danışman':{ofis:'m-ofis',sicil:'m-sicil',paylasim_bolge:'m-pay-blg'},'Etki Çevresi':{iliski:'m-iliski',sektor:'m-sektor',potansiyel:'m-potan'}};
+    var ekA=ekMap[d.tip]||{};
+    Object.keys(ekA).forEach(k=>{ var val=v(ekA[k]); if(val) d[k]=val; });
+    d._label=d.ad;
+    clearF(['m-ad','m-tel','m-email','m-meslek','m-sosyal','m-not','m-tip','m-ref','m-ilet','m-etiket'],'musteri');
+    document.getElementById('m-ek').innerHTML='';
+    document.getElementById('m-pipe').selectedIndex=0;
+
+  } else if(tip==='portfoy') {
+    if(!v('p-ad').trim()){ toast('Mülk adı zorunlu!','err'); return; }
+    d.ad=v('p-ad').trim(); d.bolge=v('p-bolge'); d.mahalle=v('p-mahalle');
+    d.sokak=v('p-sokak'); d.kategori=v('p-kategori');
+    d._crm_kategori=d.kategori==='Danışman Portföyü'?'paylasim':'yetkili';
+    d._danisman_ad=v('p-danisman-ad'); d.ilanLink=v('p-ilan-link');
+    d.tip=v('p-tip'); d.ktipi=v('p-ktipi'); d.fiyat=v('p-fiyat');
+    d.alan=v('p-alan'); d.oda=v('p-oda'); d.byasi=v('p-byasi');
+    d.kat=v('p-kat'); d.cephe=v('p-cephe'); d.isitma=v('p-isitma');
+    d.tapu=v('p-tapu'); d.ozellikler=v('p-ozellik');
+    d.durum=v('p-durum')||'Aktif';
+    d.yetkiBas=v('p-yetki-bas'); d.yetkiBit=v('p-yetki-bit');
+    d.acik=v('p-acik'); d._notlar=v('p-not');
+    d._label=d.ad+(d.bolge?' – '+d.bolge:'');
+    clearF(['p-ad','p-bolge','p-mahalle','p-sokak','p-fiyat','p-alan','p-byasi','p-kat','p-acik','p-not','p-tip','p-ktipi','p-ozellik','p-durum','p-cephe','p-isitma','p-tapu','p-yetki-bas','p-yetki-bit','p-ilan-link','p-kategori','p-danisman-ad'],'portfoy');
+    document.getElementById('p-oda').selectedIndex=0;
+    document.getElementById('p-danisman-alani').style.display='none';
+
+  } else if(tip==='mahalle') {
+    if(!v('mh-mahalle').trim()){ toast('Mahalle adı zorunlu!','err'); return; }
+    d.mahalle=v('mh-mahalle').trim(); d.ilce=v('mh-ilce');
+    d.imar_durumu=v('mh-imar'); d.bina_yapisi=v('mh-bina'); d.genel_not=v('mh-not');
+    var sk=[];
+    document.querySelectorAll('#sklar-c .skcard').forEach(c=>{
+      sk.push({ad:c.querySelector('.sk-ad')?.value||'',manzara:c.querySelector('.sk-mzr')?.value||'',trafik:c.querySelector('.sk-trf')?.value||'',yesil_alan:c.querySelector('.sk-ysl')?.value||'',toplu_tasima:c.querySelector('.sk-uls')?.value||'',ihtiyac_noktalari:c.querySelector('.sk-iht')?.value||'',not:c.querySelector('.sk-not')?.value||''});
+    });
+    d.sokaklar=sk; d._label=d.mahalle+(d.ilce?' / '+d.ilce:'');
+    clearF(['mh-mahalle','mh-ilce','mh-not','mh-imar','mh-bina'],'mahalle');
+    document.getElementById('sklar-c').innerHTML=''; skCnt=0;
+
+  } else if(tip==='gorusme') {
+    if(!v('g-musteri').trim()){ toast('Müşteri adı zorunlu!','err'); return; }
+    d.musteri=v('g-musteri').trim(); d.tip=v('g-tip'); d.ilgi=v('g-ilgi');
+    d.tarih=v('g-tarih'); d.mulk=v('g-mulk'); d.not=v('g-not');
+    d.adim=v('g-adim'); d.hat=v('g-hat'); d._label=d.musteri;
+    clearF(['g-musteri','g-mulk','g-not','g-adim','g-hat'],'gorusme');
+    document.getElementById('g-tip').selectedIndex=0;
+    document.getElementById('g-ilgi').selectedIndex=0;
+  }
+
+  DB.push(d); saveDB();
+  toast('Kayıt eklendi ✓');
+  setTimeout(goBack, 600);
+}
+
+function clearF(ids, screenId) {
+  ids.forEach(id=>{ var e=document.getElementById(id); if(e) e.value=''; });
+  var scope = screenId ? document.getElementById('s-'+screenId) : document;
+  if(scope) scope.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
+  var ekEl = document.getElementById('m-ek');
+  if(ekEl && screenId==='musteri') ekEl.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+}
+
+function saveDB(){ localStorage.setItem('saha_crm_v2',JSON.stringify(DB)); updBadge(); }
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function renderHome() {
+  var t=new Date();
+  document.getElementById('home-date').textContent = t.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('rec-count-lbl').textContent = DB.length+' kayıt';
+  document.getElementById('exp-cnt-lbl').textContent   = DB.length;
+  updBadge();
+  var list=document.getElementById('home-records');
+  if(!DB.length){ list.innerHTML='<div class="empty">Henüz kayıt yok. Yukarıdan senaryo seçin.</div>'; return; }
+  list.innerHTML=[...DB].reverse().slice(0,8).map((r,i)=>{
+    var idx=DB.length-1-i;
+    return `<div class="ri" onclick="showDetail(${idx})">
+      <div class="rdot" style="background:${TIP_RENK[r._tip]||'#888'}"></div>
+      <div class="rinfo"><div class="rn">${esc(r._label||'—')}</div><div class="rs">${TIP_LBL[r._tip]||r._tip} · ${r._tarih}</div></div>
+      <span class="rt">${(r._zamanTR?.split(' ')[1]||'').slice(0,5)}</span>
+    </div>`;
+  }).join('');
+}
+
+function updBadge(){
+  var b=document.getElementById('rec-badge');
+  if(DB.length>0){b.style.display='flex';b.textContent=DB.length>99?'99+':DB.length;}
+  else b.style.display='none';
+}
+
+// ══════════════════════════════════════════
+// DETAIL MODAL
+// ══════════════════════════════════════════
+function showDetail(idx){
+  var r=DB[idx]; if(!r) return;
+  document.getElementById('dtitle').textContent = r._label||TIP_LBL[r._tip]||'Kayıt';
+  var html=Object.keys(r).filter(k=>!SKIP.includes(k)&&r[k]&&r[k]!=='').map(k=>{
+    var lbl=LABELS[k]||k;
+    return `<div class="drow"><span class="dlbl">${lbl}</span><span class="dval">${esc(String(r[k]))}</span></div>`;
+  }).join('');
+  if(r.sokaklar&&r.sokaklar.length){
+    html+=r.sokaklar.map((s,i)=>
+      `<div class="drow"><span class="dlbl">Sokak ${i+1}</span><span class="dval">${esc(s.ad||'—')}${s.manzara?' · '+s.manzara:''}${s.trafik?' · '+s.trafik:''}</span></div>`
+    ).join('');
+  }
+  html+=`<div class="drow" style="border:none"><span class="dlbl" style="color:var(--ink4);font-size:11px">Kayıt zamanı</span><span class="dval" style="color:var(--ink3);font-size:12px">${r._zamanTR}</span></div>`;
+  html+=`<div style="margin-top:12px"><button onclick="delRec(${idx})" style="width:100%;padding:11px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">🗑 Bu Kaydı Sil</button></div>`;
+  document.getElementById('dbody').innerHTML=html;
+  document.getElementById('dmodal').classList.add('open');
+}
+function delRec(idx){ if(!confirm('Bu kayıt silinsin mi?')) return; DB.splice(idx,1); saveDB(); closeDMbtn(); renderHome(); }
+function closeDM(e){ if(e.target===document.getElementById('dmodal')) closeDMbtn(); }
+function closeDMbtn(){ document.getElementById('dmodal').classList.remove('open'); }
+
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+function renderExport(){
+  var el=document.getElementById('export-body');
+  if(!DB.length){ el.innerHTML='<div class="empty" style="padding:40px 0">Henüz kayıt yok</div>'; return; }
+  var byT={};
+  DB.forEach(r=>{ if(!byT[r._tip]) byT[r._tip]=[]; byT[r._tip].push(r); });
+  var icons={esnaf:'🏪',musteri:'👤',portfoy:'🏠',mahalle:'🗺',gorusme:'📞'};
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  Object.keys(byT).forEach(tip=>{
+    html+=`<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:var(--shadow)">
+      <div style="font-size:22px;margin-bottom:4px">${icons[tip]||'📋'}</div>
+      <div style="font-family:var(--font-head);font-size:20px;font-weight:700;color:${TIP_RENK[tip]||'#888'}">${byT[tip].length}</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px;font-weight:600">${TIP_LBL[tip]||tip}</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  html+=`<div style="background:var(--navy-pale);border:1px solid rgba(0,61,165,0.2);border-radius:var(--r);padding:14px;margin-bottom:12px">
+    <div style="font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">📋 CRM Import Kılavuzu</div>
+    <div style="font-size:11.5px;color:var(--ink2);line-height:1.8">
+      👤 <strong>Kişi & Esnaf</strong> → S.musteriler<br>
+      🏠 <strong>Portföy</strong> → S.portfoy<br>
+      📞 <strong>Görüşme</strong> → S.gorusmeler<br>
+      🗺 <strong>Mahalle</strong> → Bölge Analizi → Saha Notları → İçe Aktar
+    </div>
+  </div>`;
+
+  html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+    <button onclick="expAll()" style="width:100%;padding:13px;background:var(--navy);border:none;border-radius:var(--r);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-head);box-shadow:var(--shadow-md)">⬇ Tümünü İndir (${DB.length} kayıt)</button>
+    ${['musteri','portfoy','gorusme','esnaf','mahalle'].map(t=>
+      `<button onclick="expTip('${t}')" style="width:100%;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">${icons[t]} Sadece ${TIP_LBL[t]||t}${byT[t]?' ('+byT[t].length+')':' (0)'}</button>`
+    ).join('')}
+    <button onclick="clearAll()" style="width:100%;padding:11px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">🗑 Tüm Kayıtları Sil</button>
+  </div>`;
+
+  html+=`<div style="font-family:var(--font-head);font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Tüm Kayıtlar (${DB.length})</div>`;
+  [...DB].reverse().forEach((r,ri)=>{
+    var idx=DB.length-1-ri;
+    html+=`<div onclick="showDetail(${idx})" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--shadow)">
+      <div style="width:8px;height:8px;border-radius:50%;background:${TIP_RENK[r._tip]||'#888'};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r._label||'—')}</div>
+        <div style="font-size:11px;color:var(--ink3)">${TIP_LBL[r._tip]||r._tip} · ${r._tarih}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function expAll(){ dlJSON(DB,'saha_crm_'+new Date().toISOString().slice(0,10)+'.json'); }
+function expTip(tip){
+  var f=DB.filter(r=>r._tip===tip);
+  if(!f.length){ toast('Bu tipte kayıt yok','warn'); return; }
+  dlJSON(f,'saha_'+tip+'_'+new Date().toISOString().slice(0,10)+'.json');
+}
+function clearAll(){
+  if(!confirm('Tüm '+DB.length+' kayıt silinsin mi?')) return;
+  DB.length=0; saveDB(); renderHome(); goBack();
+}
+function dlJSON(data,fn){
+  var b=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=fn; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(u);
+  toast('JSON indirildi ✓');
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type?' '+type:'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ══════════════════════════════════════════
+// PWA & INIT
+// ══════════════════════════════════════════
+var _deferredPrompt=null;
+function pwaInstall(){
+  if(!_deferredPrompt){ toast('Tarayıcı menüsünden "Ana ekrana ekle" seçin.'); return; }
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(r=>{ if(r.outcome==='accepted') toast('Yükleniyor...'); _deferredPrompt=null; });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  renderHome();
+  history.pushState(null,'');
+  window.addEventListener('popstate',function(){
+    if(curScr!=='home'){ goBack(); history.pushState(null,''); }
+  });
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); _deferredPrompt=e;
+    document.getElementById('install-btn').style.display='flex';
+  });
+  window.addEventListener('appinstalled',function(){
+    _deferredPrompt=null;
+    document.getElementById('install-btn').style.display='none';
+    toast('Uygulama ana ekrana eklendi ✓');
+  });
+});
+</script>
+</body>
+</html>
