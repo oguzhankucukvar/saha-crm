@@ -828,6 +828,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 var DB = JSON.parse(localStorage.getItem('saha_crm_v2') || '[]');
 var skCnt = 0;
 var curScr = 'home';
+var _editIdx = null;   // null = yeni kayıt, sayı = düzenleme modu indeksi
 var _deferredPrompt = null;
 
 var TIP_RENK = { esnaf:'#003DA5', musteri:'#CC0000', portfoy:'#1A7A45', mahalle:'#E65C00', gorusme:'#1a5fa0' };
@@ -879,7 +880,8 @@ var LABELS = {
   kira_max:'Max Kira', mulk_adres:'Mülk Adresi', beklenti:'Fiyat Beklenti',
   firma:'Firma', vergi_no:'Vergi No', yetkili:'Yetkili',
   iliski:'İlişki Türü', sektor:'Sektör', potansiyel:'Potansiyel',
-  _esnaf_kira_durum:'Mülkiyet', _esnaf_kira_bedel:'Kira (₺)', _esnaf_piyasa:'Piyasa Yorumu'
+  _esnaf_kira_durum:'Mülkiyet', _esnaf_kira_bedel:'Kira (₺)', _esnaf_piyasa:'Piyasa Yorumu',
+  _duzenlemeTarihi:'Son Düzenleme'
 };
 var SKIP = ['_id','_tip','_zaman','_zamanTR','_tarih','_label','_crm_kategori','etiketler','sokaklar','_notlar'];
 
@@ -892,10 +894,22 @@ function goTo(scr) {
   curScr = scr;
   if(scr==='gorusme'){
     var n=new Date(), p=n=>String(n).padStart(2,'0');
-    document.getElementById('g-tarih').value = n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());
+    if(!_editIdx) // Yeni kayıtta varsayılan tarih
+      document.getElementById('g-tarih').value = n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());
   }
+  // Form başlığını ve kaydet butonunu edit moduna göre güncelle
+  _updateFormUI(scr);
 }
-function goBack(){ goTo('home'); renderHome(); }
+
+function _updateFormUI(scr){
+  var editMod = _editIdx !== null;
+  var tipMap = {esnaf:'Esnaf Görüşmesi', musteri:'Kişi / Müşteri', portfoy:'Portföy İlanı', mahalle:'Mahalle Notu', gorusme:'Görüşme Notu'};
+  var fhi = document.querySelector('#s-'+scr+' .fhi p');
+  if(fhi) fhi.textContent = editMod ? '✏️ Düzenleme modu' : ({esnaf:'Piyasa bilgisi ve işletme notu',musteri:'CRM ile birebir uyumlu',portfoy:'Mülk kaydı',mahalle:'CRM Bölge Analizi → Saha Notları',gorusme:'CRM görüşme kaydı'}[scr]||'');
+  var btn = document.querySelector('#s-'+scr+' .savebtn');
+  if(btn) btn.textContent = editMod ? 'Güncelle ✓' : 'Kaydet ✓';
+}
+function goBack(){ _editIdx=null; goTo('home'); renderHome(); }
 function showExport(){ goTo('export'); renderExport(); }
 
 // ══════════════════════════════════════════
@@ -933,26 +947,7 @@ function updPKat() {
 // ══════════════════════════════════════════
 // SOKAK
 // ══════════════════════════════════════════
-function addSokak() {
-  skCnt++;
-  var n=skCnt, c=document.getElementById('sklar-c'), div=document.createElement('div');
-  div.className='skcard'; div.id='sk-'+n;
-  div.innerHTML=`<div class="skhead"><span>Sokak ${n}</span><button onclick="document.getElementById('sk-${n}').remove()">✕ Sil</button></div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div class="fg"><label>Sokak Adı</label><input type="text" class="sk-ad" placeholder="Sokak / Cadde adı" autocomplete="off"></div>
-      <div class="frow">
-        <div class="fg"><label>Manzara</label><select class="sk-mzr"><option value="">—</option><option>Deniz / Boğaz</option><option>Yeşil Alan</option><option>Şehir</option><option>İç Avlu</option><option>Karışık</option></select></div>
-        <div class="fg"><label>Trafik / Park</label><select class="sk-trf"><option value="">—</option><option>Sakin / Kolay Park</option><option>Orta Yoğunluk</option><option>Yoğun / Zor Park</option></select></div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Yeşil Alan</label><select class="sk-ysl"><option value="">—</option><option>Yok</option><option>Az</option><option>Orta</option><option>Bol</option></select></div>
-        <div class="fg"><label>Toplu Taşıma</label><select class="sk-uls"><option value="">—</option><option>Yakın (yürüme)</option><option>Orta Mesafe</option><option>Uzak</option></select></div>
-      </div>
-      <div class="fg"><label>Temel İhtiyaç Noktaları</label><input type="text" class="sk-iht" placeholder="Market, eczane, okul..." autocomplete="off"></div>
-      <div class="fg"><label>Sokak Notu</label><input type="text" class="sk-not" placeholder="Bu sokakla ilgili notunuz" autocomplete="off"></div>
-    </div>`;
-  c.appendChild(div);
-}
+function addSokak() { addSokakWithData({}); }
 
 // ══════════════════════════════════════════
 // KAYIT
@@ -1033,12 +1028,28 @@ function save_(tip) {
     document.getElementById('g-ilgi').selectedIndex=0;
   }
 
-  DB.push(d); saveDB();
-  toast('Kayıt eklendi ✓');
+  if(_editIdx !== null){
+    // Düzenleme modu — eski kaydın id ve tarihini koru
+    d._id    = DB[_editIdx]._id;
+    d._zaman = DB[_editIdx]._zaman;
+    d._tarih = DB[_editIdx]._tarih;
+    d._zamanTR = DB[_editIdx]._zamanTR;
+    d._duzenlemeTarihi = new Date().toLocaleString('tr-TR');
+    DB[_editIdx] = d;
+    _editIdx = null;
+    saveDB();
+    toast('Kayıt güncellendi ✓');
+  } else {
+    DB.push(d);
+    saveDB();
+    toast('Kayıt eklendi ✓');
+  }
   setTimeout(goBack, 600);
 }
 
 function clearF(ids, screenId) {
+  // Edit modunda form alanlarını temizleme — zaten güncellendi
+  if(_editIdx !== null) return;
   ids.forEach(id=>{ var e=document.getElementById(id); if(e) e.value=''; });
   var scope = screenId ? document.getElementById('s-'+screenId) : document;
   if(scope) scope.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
@@ -1091,9 +1102,190 @@ function showDetail(idx){
     ).join('');
   }
   html+=`<div class="drow" style="border:none"><span class="dlbl" style="color:var(--ink4);font-size:11px">Kayıt zamanı</span><span class="dval" style="color:var(--ink3);font-size:12px">${r._zamanTR}</span></div>`;
-  html+=`<div style="margin-top:12px"><button onclick="delRec(${idx})" style="width:100%;padding:11px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">🗑 Bu Kaydı Sil</button></div>`;
+  // Düzenle + Sil butonları
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+    <button onclick="editRecord(${idx})" style="padding:12px;background:var(--navy-pale);border:1.5px solid rgba(0,61,165,0.3);border-radius:var(--r);color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">✏️ Düzenle</button>
+    <button onclick="delRec(${idx})" style="padding:12px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">🗑 Sil</button>
+  </div>`;
   document.getElementById('dbody').innerHTML=html;
   document.getElementById('dmodal').classList.add('open');
+}
+
+function editRecord(idx){
+  var r=DB[idx]; if(!r) return;
+  closeDMbtn();
+  _editIdx = idx;
+
+  if(r._tip==='esnaf'){
+    // Esnaf not alanını parse et
+    document.getElementById('e-isletme').value = r.ad||'';
+    document.getElementById('e-tel').value      = r.tel||'';
+    // Nottan ayrıştır
+    var yetkili='', kiraDurum='', kiraBedel='', piyasa='', not_='';
+    (r.not||'').split(' | ').forEach(function(p){
+      if(p.startsWith('Yetkili: '))    yetkili   = p.replace('Yetkili: ','');
+      if(p.startsWith('Mülkiyet: '))   kiraDurum = p.replace('Mülkiyet: ','');
+      if(p.startsWith('Kira: ₺'))      kiraBedel = p.replace('Kira: ₺','');
+      if(p.startsWith('Piyasa: '))     piyasa    = p.replace('Piyasa: ','');
+      if(p.startsWith('Not: '))        not_      = p.replace('Not: ','');
+    });
+    document.getElementById('e-yetkili').value    = r._esnaf_yetkili||yetkili;
+    document.getElementById('e-kira-bedel').value = r._esnaf_kira_bedel||kiraBedel;
+    document.getElementById('e-piyasa').value      = r._esnaf_piyasa||piyasa;
+    document.getElementById('e-not').value         = not_;
+    setChip('s-esnaf', 'e-istip',     r.meslek||'');
+    setChip('s-esnaf', 'e-kira-durum', r._esnaf_kira_durum||kiraDurum);
+    goTo('esnaf');
+
+  } else if(r._tip==='musteri'){
+    document.getElementById('m-ad').value     = r.ad||'';
+    document.getElementById('m-tel').value    = r.tel||'';
+    document.getElementById('m-email').value  = r.email||'';
+    document.getElementById('m-meslek').value = r.meslek||'';
+    document.getElementById('m-sosyal').value = r.sosyal||'';
+    document.getElementById('m-not').value    = r.not||'';
+    setSelect('m-pipe', r.pipeline||'Potansiyel');
+    setSelect('m-ref',  r.referans||'');
+    setSelect('m-ilet', r.iletisim||'');
+    setChip('s-musteri','m-tip', r.tip||'');
+    // Etiket chip'ini bul
+    var etikLabel = Object.keys(ETIK_MAP).find(k=>ETIK_MAP[k]===(r.etiketler&&r.etiketler[0]));
+    if(etikLabel) setChip('s-musteri','m-etiket', etikLabel);
+    // Tip'e özel ek alanlar
+    if(r.tip) {
+      updMTip();
+      setTimeout(function(){
+        var ekMap={'Alıcı':{butce:'m-butce',tercih_bolge:'m-t-bolge',tercih_oda:'m-t-oda'},'Kiracı':{kira_max:'m-kira-max',tercih_bolge:'m-t-bolge',tasima_tarihi:'m-kira-tar'},'Satıcı':{mulk_adres:'m-mulk-adr',beklenti:'m-beklenti',satis_sure:'m-sat-sure'},'Mülk Sahibi':{mulk_adres:'m-mulk-adr',deger_beklenti:'m-deg-bkl',deger_tarihi:'m-deg-tar'},'Yatırımcı':{butce:'m-yat-btc',yatirim_amac:'m-yat-amc',yatirim_sure:'m-yat-vad'},'Kurumsal':{firma:'m-firma',vergi_no:'m-vergi',yetkili:'m-yetkili'},'Müteahhit':{firma:'m-firma',proje_sayisi:'m-prj-say',paylasim:'m-paylasim'},'Danışman':{ofis:'m-ofis',sicil:'m-sicil',paylasim_bolge:'m-pay-blg'},'Etki Çevresi':{iliski:'m-iliski',sektor:'m-sektor',potansiyel:'m-potan'}};
+        var ekA=ekMap[r.tip]||{};
+        Object.keys(ekA).forEach(function(k){ var el=document.getElementById(ekA[k]); if(el) el.value=r[k]||''; });
+      },50);
+    }
+    goTo('musteri');
+
+  } else if(r._tip==='portfoy'){
+    document.getElementById('p-ad').value         = r.ad||'';
+    document.getElementById('p-bolge').value      = r.bolge||'';
+    document.getElementById('p-mahalle').value    = r.mahalle||'';
+    document.getElementById('p-sokak').value      = r.sokak||'';
+    document.getElementById('p-ilan-link').value  = r.ilanLink||'';
+    document.getElementById('p-fiyat').value      = r.fiyat||'';
+    document.getElementById('p-alan').value       = r.alan||'';
+    document.getElementById('p-byasi').value      = r.byasi||'';
+    document.getElementById('p-kat').value        = r.kat||'';
+    document.getElementById('p-acik').value       = r.acik||'';
+    document.getElementById('p-not').value        = r._notlar||'';
+    document.getElementById('p-yetki-bas').value  = r.yetkiBas||'';
+    document.getElementById('p-yetki-bit').value  = r.yetkiBit||'';
+    document.getElementById('p-danisman-ad').value= r._danisman_ad||'';
+    setSelect('p-oda',   r.oda||'');
+    setSelect('p-cephe', r.cephe||'');
+    setSelect('p-isitma',r.isitma||'');
+    setSelect('p-tapu',  r.tapu||'');
+    setSelect('p-ktipi', r.ktipi||'');
+    setChip('s-portfoy','p-tip',      r.tip||'');
+    setChip('s-portfoy','p-durum',    r.durum||'');
+    setChip('s-portfoy','p-kategori', r.kategori||'');
+    // Özellikler — çoklu chip
+    if(r.ozellikler){
+      var seciliOz = r.ozellikler.split(',').map(s=>s.trim());
+      document.querySelectorAll('#s-portfoy .chip').forEach(function(c){
+        if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'p-ozellik'")&&seciliOz.includes(c.textContent.trim())){
+          c.classList.add('on');
+        }
+      });
+      document.getElementById('p-ozellik').value = r.ozellikler;
+    }
+    updPKat();
+    goTo('portfoy');
+
+  } else if(r._tip==='mahalle'){
+    document.getElementById('mh-mahalle').value = r.mahalle||'';
+    document.getElementById('mh-ilce').value    = r.ilce||'';
+    document.getElementById('mh-not').value     = r.genel_not||'';
+    setChip('s-mahalle','mh-imar', r.imar_durumu||'');
+    // Bina yapısı — çoklu chip
+    if(r.bina_yapisi){
+      var secilenBina = r.bina_yapisi.split(',').map(s=>s.trim());
+      document.querySelectorAll('#s-mahalle .chip').forEach(function(c){
+        if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'mh-bina'")&&secilenBina.includes(c.textContent.trim())){
+          c.classList.add('on');
+        }
+      });
+      document.getElementById('mh-bina').value = r.bina_yapisi;
+    }
+    // Sokakları yükle
+    var skC = document.getElementById('sklar-c');
+    skC.innerHTML=''; skCnt=0;
+    (r.sokaklar||[]).forEach(function(s){ addSokakWithData(s); });
+    goTo('mahalle');
+
+  } else if(r._tip==='gorusme'){
+    document.getElementById('g-musteri').value = r.musteri||'';
+    document.getElementById('g-mulk').value    = r.mulk||'';
+    document.getElementById('g-not').value     = r.not||'';
+    document.getElementById('g-adim').value    = r.adim||'';
+    document.getElementById('g-hat').value     = r.hat||'';
+    document.getElementById('g-tarih').value   = r.tarih ? r.tarih.slice(0,16) : '';
+    setSelect('g-tip',  r.tip||'Telefon');
+    setSelect('g-ilgi', r.ilgi||'');
+    goTo('gorusme');
+  }
+}
+
+// Chip'i programatik olarak seç (tek seçim)
+function setChip(screenId, hiddenId, value){
+  if(!value) return;
+  var screen = document.getElementById(screenId);
+  if(!screen) return;
+  screen.querySelectorAll('.chip').forEach(function(c){
+    if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'"+hiddenId+"'")&&c.textContent.trim()===value.trim()){
+      c.classList.add('on');
+    }
+  });
+  var hid = document.getElementById(hiddenId);
+  if(hid) hid.value = value;
+}
+
+// Select'i programatik olarak seç
+function setSelect(id, value){
+  var el=document.getElementById(id); if(!el||!value) return;
+  for(var i=0;i<el.options.length;i++){
+    if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
+  }
+}
+
+// Veriyle sokak kartı ekle
+function addSokakWithData(s){
+  skCnt++;
+  var n=skCnt, c=document.getElementById('sklar-c'), div=document.createElement('div');
+  div.className='skcard'; div.id='sk-'+n;
+  div.innerHTML=`<div class="skhead"><span>Sokak ${n}</span><button onclick="document.getElementById('sk-${n}').remove()">✕ Sil</button></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="fg"><label>Sokak Adı</label><input type="text" class="sk-ad" value="${esc(s.ad||'')}" placeholder="Sokak / Cadde adı" autocomplete="off"></div>
+      <div class="frow">
+        <div class="fg"><label>Manzara</label><select class="sk-mzr"><option value="">—</option><option>Deniz / Boğaz</option><option>Yeşil Alan</option><option>Şehir</option><option>İç Avlu</option><option>Karışık</option></select></div>
+        <div class="fg"><label>Trafik / Park</label><select class="sk-trf"><option value="">—</option><option>Sakin / Kolay Park</option><option>Orta Yoğunluk</option><option>Yoğun / Zor Park</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Yeşil Alan</label><select class="sk-ysl"><option value="">—</option><option>Yok</option><option>Az</option><option>Orta</option><option>Bol</option></select></div>
+        <div class="fg"><label>Toplu Taşıma</label><select class="sk-uls"><option value="">—</option><option>Yakın (yürüme)</option><option>Orta Mesafe</option><option>Uzak</option></select></div>
+      </div>
+      <div class="fg"><label>Temel İhtiyaç Noktaları</label><input type="text" class="sk-iht" value="${esc(s.ihtiyac_noktalari||s.ihtiyacNoktalari||'')}" placeholder="Market, eczane, okul..." autocomplete="off"></div>
+      <div class="fg"><label>Sokak Notu</label><input type="text" class="sk-not" value="${esc(s.not||'')}" placeholder="Bu sokakla ilgili notunuz" autocomplete="off"></div>
+    </div>`;
+  c.appendChild(div);
+  // Select değerlerini ayarla
+  setSelect2(div.querySelector('.sk-mzr'), s.manzara||'');
+  setSelect2(div.querySelector('.sk-trf'), s.trafik||'');
+  setSelect2(div.querySelector('.sk-ysl'), s.yesil_alan||s.yesilAlan||'');
+  setSelect2(div.querySelector('.sk-uls'), s.toplu_tasima||s.topluTasima||'');
+}
+
+function setSelect2(el, value){
+  if(!el||!value) return;
+  for(var i=0;i<el.options.length;i++){
+    if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
+  }
 }
 function delRec(idx){ if(!confirm('Bu kayıt silinsin mi?')) return; DB.splice(idx,1); saveDB(); closeDMbtn(); renderHome(); }
 function closeDM(e){ if(e.target===document.getElementById('dmodal')) closeDMbtn(); }
