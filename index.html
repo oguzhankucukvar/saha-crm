@@ -1057,7 +1057,19 @@ function clearF(ids, screenId) {
   if(ekEl && screenId==='musteri') ekEl.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
 }
 
-function saveDB(){ localStorage.setItem('saha_crm_v2',JSON.stringify(DB)); updBadge(); }
+function saveDB(){
+  try {
+    var json = JSON.stringify(DB);
+    var kb = Math.round((json.length * 2) / 1024);
+    if(kb > 4500) toast('⚠️ Depolama dolmak üzere! Dışa aktarın.');
+    localStorage.setItem('saha_crm_v2', json);
+    // Otomatik yedek
+    localStorage.setItem('saha_crm_v2_backup', json);
+    updBadge();
+  } catch(e) {
+    toast('❌ Kayıt başarısız! Depolama dolu olabilir, dışa aktarın.');
+  }
+}
 
 // ══════════════════════════════════════════
 // HOME
@@ -1287,10 +1299,54 @@ function setSelect2(el, value){
     if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
   }
 }
-function delRec(idx){ if(!confirm('Bu kayıt silinsin mi?')) return; DB.splice(idx,1); saveDB(); closeDMbtn(); renderHome(); }
+function delRec(idx){
+  // confirm() yerine uygulama içi onay — GitHub Pages / PWA uyumlu
+  var dbody = document.getElementById('dbody');
+  if(!dbody) return;
+  // Önceki onay kutusu varsa kaldır
+  var eskiOnay = document.getElementById('saha-sil-onay');
+  if(eskiOnay) eskiOnay.remove();
+  var onay = document.createElement('div');
+  onay.id = 'saha-sil-onay';
+  onay.style.cssText = 'background:#fff0f0;border:1px solid rgba(204,0,0,0.3);border-radius:10px;padding:14px;margin-top:12px';
+  onay.innerHTML = '<div style="font-size:13px;color:#CC0000;font-weight:700;margin-bottom:10px">Bu kayıt silinecek. Emin misiniz?</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<button onclick="delRecOnayla('+idx+')" style="flex:1;padding:10px;background:#CC0000;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Evet, Sil</button>'
+    + '<button onclick="document.getElementById(\'saha-sil-onay\').remove()" style="flex:1;padding:10px;background:#fff;color:#444;border:1.5px solid #ddd;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">İptal</button>'
+    + '</div>';
+  dbody.appendChild(onay);
+}
+
+function delRecOnayla(idx){
+  DB.splice(idx,1);
+  saveDB();
+  closeDMbtn();
+  renderHome();
+  toast('🗑️ Kayıt silindi');
+}
+
+function clearAll(){
+  var el = document.getElementById('export-body');
+  if(!el) return;
+  var eskiOnay = document.getElementById('saha-clearall-onay');
+  if(eskiOnay) { eskiOnay.style.display = eskiOnay.style.display==='none'?'block':'none'; return; }
+  var onay = document.createElement('div');
+  onay.id = 'saha-clearall-onay';
+  onay.style.cssText = 'background:#fff0f0;border:1px solid rgba(204,0,0,0.3);border-radius:10px;padding:14px;margin-top:10px';
+  onay.innerHTML = '<div style="font-size:13px;color:#CC0000;font-weight:700;margin-bottom:10px">Tüm '+DB.length+' kayıt silinecek. Bu işlem geri alınamaz!</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<button onclick="clearAllOnayla()" style="flex:1;padding:10px;background:#CC0000;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Evet, Tümünü Sil</button>'
+    + '<button onclick="document.getElementById(\'saha-clearall-onay\').style.display=\'none\'" style="flex:1;padding:10px;background:#fff;color:#444;border:1.5px solid #ddd;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">İptal</button>'
+    + '</div>';
+  el.insertBefore(onay, el.firstChild);
+}
+
+function clearAllOnayla(){
+  DB.length=0; saveDB(); renderHome(); goBack();
+}
+
 function closeDM(e){ if(e.target===document.getElementById('dmodal')) closeDMbtn(); }
 function closeDMbtn(){ document.getElementById('dmodal').classList.remove('open'); }
-
 // ══════════════════════════════════════════
 // EXPORT
 // ══════════════════════════════════════════
@@ -1348,10 +1404,6 @@ function expTip(tip){
   var f=DB.filter(r=>r._tip===tip);
   if(!f.length){ toast('Bu tipte kayıt yok','warn'); return; }
   dlJSON(f,'saha_'+tip+'_'+new Date().toISOString().slice(0,10)+'.json');
-}
-function clearAll(){
-  if(!confirm('Tüm '+DB.length+' kayıt silinsin mi?')) return;
-  DB.length=0; saveDB(); renderHome(); goBack();
 }
 function dlJSON(data,fn){
   var b=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
