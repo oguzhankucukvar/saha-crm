@@ -403,6 +403,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
         <span class="exp-cnt" id="exp-cnt-lbl">0</span>
       </button>
     </div>
+    <div style="padding:0 16px 8px">
+      <button onclick="showOzet()" style="width:100%;padding:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">
+        📊 Gezi Özeti
+      </button>
+    </div>
     <button id="install-btn" onclick="pwaInstall()">📲 Ana Ekrana Ekle</button>
     <div class="bpad"></div>
   </div>
@@ -415,7 +420,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       <span class="fpill" style="background:var(--navy-pale);color:var(--navy);">Etki Çevresi</span>
     </div>
     <div class="fbody">
-      <div class="info-box">ℹ️ Esnaf kaydı CRM'e <strong>Etki Çevresi</strong> tipinde Kişi olarak aktarılır.</div>
+      <div class="info-box">ℹ️ Esnaf kaydı CRM'e <strong>Esnaf</strong> tipinde Kişi olarak aktarılır.</div>
+
+      <!-- İŞLETME BİLGİLERİ -->
       <div class="fsec">
         <div class="fsec-label">İşletme Bilgileri</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
@@ -432,37 +439,114 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
               <div class="chip" onclick="togChip(this,'e-istip')">Berber / Kuaför</div>
               <div class="chip" onclick="togChip(this,'e-istip')">Eczane</div>
               <div class="chip" onclick="togChip(this,'e-istip')">Kırtasiye</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Elektronik</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Yapı Malzeme</div>
               <div class="chip" onclick="togChip(this,'e-istip')">Diğer</div>
             </div>
             <input type="hidden" id="e-istip">
           </div>
+          <div class="fg"><label>Kaç yıldır bu işyerinde?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-sure')">1 yıldan az</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">1–3 yıl</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">3–10 yıl</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">10+ yıl</div>
+            </div>
+            <input type="hidden" id="e-sure">
+          </div>
         </div>
       </div>
+
+      <!-- MÜLKİYET & KİRA -->
       <div class="fsec">
         <div class="fsec-label">Mülkiyet & Kira</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div class="fg"><label>İşletme Mülkiyet Durumu</label>
             <div class="chips">
-              <div class="chip" onclick="selChip(this,'e-kira-durum')">Kendi Mülkü</div>
-              <div class="chip" onclick="selChip(this,'e-kira-durum')">Kiracı</div>
-              <div class="chip" onclick="selChip(this,'e-kira-durum')">Bilinmiyor</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Kendi Mülkü</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Kiracı</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Devir</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Bilinmiyor</div>
             </div>
             <input type="hidden" id="e-kira-durum">
           </div>
-          <div class="fg"><label>Tahmini Kira (₺/ay)</label><input type="number" id="e-kira-bedel" placeholder="Boş bırakılabilir" inputmode="numeric"></div>
+          <div id="e-kira-detay" style="display:none;flex-direction:column;gap:10px;">
+            <div class="fg"><label>Tahmini Kira (₺/ay)</label><input type="number" id="e-kira-bedel" placeholder="örn: 25000" inputmode="numeric"></div>
+            <div class="fg"><label>Kira Artış Beklentisi</label>
+              <div class="chips">
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Artacak</div>
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Sabit</div>
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Belirsiz</div>
+              </div>
+              <input type="hidden" id="e-kira-artis">
+            </div>
+          </div>
+          <div id="e-devir-detay" style="display:none;">
+            <div class="fg"><label>Devir Bedeli (₺)</label><input type="number" id="e-devir-bedel" placeholder="Tahmini devir bedeli" inputmode="numeric"></div>
+          </div>
         </div>
       </div>
+
+      <!-- PİYASA BİLGİSİ -->
       <div class="fsec">
-        <div class="fsec-label">Piyasa Bilgisi</div>
+        <div class="fsec-label">Piyasa Gözlemi</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <div class="fg"><label>Bölge Piyasası Yorumları</label>
-            <textarea id="e-piyasa" placeholder="Kira fiyatları, müşteri yoğunluğu, doluluk oranı..."></textarea>
+          <div class="fg"><label>Bölge Hareketliliği</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Çok Hareketli</div>
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Normal</div>
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Durgun</div>
+            </div>
+            <input type="hidden" id="e-hareketlilik">
+          </div>
+          <div class="fg"><label>Son 1 yılda bölgede mülk el değiştirdi mi?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Evet — Hareketli</div>
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Kısmen</div>
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Hayır — Durgun</div>
+            </div>
+            <input type="hidden" id="e-eldegistirme">
+          </div>
+          <div class="fg"><label>Boş dükkan / işyeri var mı?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Birkaç Tane</div>
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Çok Var</div>
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Yok</div>
+            </div>
+            <input type="hidden" id="e-bos-dukkan">
+          </div>
+          <div class="fg"><label>Bölge Piyasası Yorumu</label>
+            <textarea id="e-piyasa" rows="3" placeholder="Kira fiyatları, müşteri yoğunluğu, yeni yapılaşma..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- REFERANS POTANSİYELİ -->
+      <div class="fsec">
+        <div class="fsec-label">Referans & Fırsat</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Potansiyel referans verebilir mi?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-referans')">Evet</div>
+              <div class="chip" onclick="selChip(this,'e-referans')">Belki</div>
+              <div class="chip" onclick="selChip(this,'e-referans')">Hayır</div>
+            </div>
+            <input type="hidden" id="e-referans">
+          </div>
+          <div class="fg"><label>İletişim Tercihi</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-iletisim')">Telefon</div>
+              <div class="chip" onclick="selChip(this,'e-iletisim')">WhatsApp</div>
+              <div class="chip" onclick="selChip(this,'e-iletisim')">Yüz Yüze</div>
+            </div>
+            <input type="hidden" id="e-iletisim">
           </div>
           <div class="fg"><label>Notlarım</label>
-            <textarea id="e-not" placeholder="Kişisel gözlem, takip notu, fırsat..."></textarea>
+            <textarea id="e-not" rows="3" placeholder="Kişisel gözlem, takip notu, fırsat, dikkat edilecek..."></textarea>
           </div>
         </div>
       </div>
+
     </div>
     <div class="savebar"><button class="savebtn btn-navy" onclick="save_('esnaf')">Kaydet ✓</button></div>
   </div>
@@ -798,6 +882,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="savebar"><button class="savebtn btn-blue" onclick="save_('gorusme')">Kaydet ✓</button></div>
   </div>
 
+  <!-- ════ SAHA ÖZETİ ════ -->
+  <div class="screen" id="s-ozet">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Gezi Özeti</h2><p>Bugünkü saha çalışması</p></div>
+    </div>
+    <div class="fbody" id="ozet-body"></div>
+    <div class="bpad"></div>
+  </div>
+
   <!-- ════ EXPORT ════ -->
   <div class="screen" id="s-export">
     <div class="fhdr">
@@ -881,9 +975,16 @@ var LABELS = {
   firma:'Firma', vergi_no:'Vergi No', yetkili:'Yetkili',
   iliski:'İlişki Türü', sektor:'Sektör', potansiyel:'Potansiyel',
   _esnaf_kira_durum:'Mülkiyet', _esnaf_kira_bedel:'Kira (₺)', _esnaf_piyasa:'Piyasa Yorumu',
+  _esnaf_sure:'İşyerinde Süre', _esnaf_kira_artis:'Kira Artış Beklentisi',
+  _esnaf_devir_bedel:'Devir Bedeli (₺)', _esnaf_hareketlilik:'Bölge Hareketliliği',
+  _esnaf_eldegistirme:'El Değiştirme', _esnaf_bos_dukkan:'Boş Dükkan',
+  _esnaf_referans:'Referans Potansiyeli', _esnaf_iletisim:'İletişim Tercihi',
   _duzenlemeTarihi:'Son Düzenleme'
 };
-var SKIP = ['_id','_tip','_zaman','_zamanTR','_tarih','_label','_crm_kategori','etiketler','sokaklar','_notlar'];
+var SKIP = ['_id','_tip','_zaman','_zamanTR','_tarih','_label','_crm_kategori','etiketler','sokaklar','_notlar',
+  '_esnaf_kira_durum','_esnaf_kira_bedel','_esnaf_kira_artis','_esnaf_devir_bedel',
+  '_esnaf_sure','_esnaf_hareketlilik','_esnaf_eldegistirme','_esnaf_bos_dukkan',
+  '_esnaf_referans','_esnaf_iletisim','_esnaf_yetkili'];
 
 // ══════════════════════════════════════════
 // NAVİGASYON
@@ -911,6 +1012,146 @@ function _updateFormUI(scr){
 }
 function goBack(){ _editIdx=null; goTo('home'); renderHome(); }
 function showExport(){ goTo('export'); renderExport(); }
+function showOzet(){ goTo('ozet'); renderOzet(); }
+
+// Esnaf — mülkiyet seçimine göre koşullu alanları göster
+function esnafKiraToggle(secim) {
+  var kiraDetay  = document.getElementById('e-kira-detay');
+  var devirDetay = document.getElementById('e-devir-detay');
+  if(kiraDetay)  kiraDetay.style.display  = secim==='Kiracı'     ? 'flex' : 'none';
+  if(devirDetay) devirDetay.style.display = secim==='Devir'      ? ''     : 'none';
+}
+
+// ── Saha Özeti ──────────────────────────────────────
+function renderOzet() {
+  var el = document.getElementById('ozet-body');
+  if(!el) return;
+
+  var bugun = new Date().toLocaleDateString('tr-TR');
+  var bugunKayitlar = DB.filter(function(r){
+    return r._tarih === bugun;
+  });
+
+  // Tip bazlı sayım
+  var sayim = { esnaf:0, musteri:0, portfoy:0, mahalle:0, gorusme:0 };
+  bugunKayitlar.forEach(function(r){ if(sayim[r._tip]!==undefined) sayim[r._tip]++; });
+  var toplamBugun = bugunKayitlar.length;
+
+  // Tüm zamanlar
+  var toplamTum = DB.length;
+  var byT = {};
+  DB.forEach(function(r){ byT[r._tip]=(byT[r._tip]||0)+1; });
+
+  // Esnaf piyasa yorumları
+  var esnaflar = bugunKayitlar.filter(function(r){ return r._tip==='esnaf'; });
+  var referansVar = esnaflar.filter(function(r){ return r._esnaf_referans==='Evet'; }).length;
+  var devirVar = esnaflar.filter(function(r){
+    return (r._esnaf_kira_durum||'').toLowerCase().includes('devir');
+  }).length;
+
+  // Portföy kategorileri
+  var portfoyler = bugunKayitlar.filter(function(r){ return r._tip==='portfoy'; });
+  var yetkili = portfoyler.filter(function(r){ return r.kategori==='Yetkili Portföyüm'; }).length;
+  var sahibinden = portfoyler.filter(function(r){ return r.kategori==='Sahibinden İlanı'; }).length;
+  var danisman = portfoyler.filter(function(r){ return r.kategori==='Danışman Portföyü'; }).length;
+
+  var renk = { esnaf:'#003DA5', musteri:'#CC0000', portfoy:'#1A7A45', mahalle:'#E65C00', gorusme:'#1a5fa0' };
+  var ikon = { esnaf:'🏪', musteri:'👤', portfoy:'🏠', mahalle:'🗺️', gorusme:'📞' };
+  var lbl  = { esnaf:'Esnaf', musteri:'Kişi', portfoy:'Portföy', mahalle:'Mahalle', gorusme:'Görüşme' };
+
+  var html = '';
+
+  // Başlık
+  html += '<div style="padding:16px 0 8px">'
+    + '<div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--navy)">'
+    + new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})
+    + '</div>'
+    + '<div style="font-size:13px;color:var(--ink3);margin-top:2px">Bugünkü saha çalışmanız</div>'
+    + '</div>';
+
+  // Bugün kartları
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  ['esnaf','musteri','portfoy','mahalle','gorusme'].forEach(function(t){
+    var cnt = sayim[t] || 0;
+    html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px;box-shadow:var(--shadow)">'
+      + '<div style="font-size:22px;margin-bottom:4px">' + ikon[t] + '</div>'
+      + '<div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:' + (cnt>0?renk[t]:'var(--ink4)') + '">' + cnt + '</div>'
+      + '<div style="font-size:11px;color:var(--ink3);font-weight:600;margin-top:2px">' + lbl[t] + '</div>'
+      + '</div>';
+  });
+  // Toplam kutusu
+  html += '<div style="background:var(--navy);border-radius:var(--r);padding:14px 12px;box-shadow:var(--shadow-md)">'
+    + '<div style="font-size:20px;margin-bottom:4px">📋</div>'
+    + '<div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#fff">' + toplamBugun + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600;margin-top:2px">Bugün Toplam</div>'
+    + '</div>';
+  html += '</div>';
+
+  // Öne çıkan bulgular
+  if(toplamBugun > 0) {
+    var bulgular = [];
+    if(referansVar > 0)
+      bulgular.push({ ikon:'✅', renk:'var(--green)', mesaj: referansVar + ' esnaf referans potansiyeli gösterdi' });
+    if(devirVar > 0)
+      bulgular.push({ ikon:'🔄', renk:renk.esnaf, mesaj: devirVar + ' işletme devir durumunda — fırsat!' });
+    if(yetkili > 0)
+      bulgular.push({ ikon:'🏠', renk:renk.portfoy, mesaj: yetkili + ' yetkili portföy kaydedildi' });
+    if(sahibinden > 0)
+      bulgular.push({ ikon:'🔍', renk:'var(--orange)', mesaj: sahibinden + ' sahibinden ilanı tespit edildi' });
+    if(danisman > 0)
+      bulgular.push({ ikon:'👔', renk:renk.gorusme, mesaj: danisman + ' danışman portföyü not alındı' });
+
+    if(bulgular.length) {
+      html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Öne Çıkan Bulgular</div>';
+      html += bulgular.map(function(b){
+        return '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)">'
+          + '<span style="font-size:18px">' + b.ikon + '</span>'
+          + '<span style="font-size:13px;font-weight:600;color:' + b.renk + '">' + b.mesaj + '</span>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  // Bugünkü kayıtlar listesi
+  if(bugunKayitlar.length) {
+    html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin:12px 0 8px">Bugünkü Kayıtlar</div>';
+    bugunKayitlar.slice().reverse().forEach(function(r){
+      var idx = DB.indexOf(r);
+      html += '<div onclick="showDetail(' + idx + ')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--shadow)">'
+        + '<div style="width:8px;height:8px;border-radius:50%;background:' + (renk[r._tip]||'#888') + ';flex-shrink:0"></div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r._label||'—') + '</div>'
+        + '<div style="font-size:11px;color:var(--ink3)">' + (lbl[r._tip]||r._tip) + ' · ' + ((r._zamanTR||'').split(' ')[1]||'').slice(0,5) + '</div>'
+        + '</div>'
+        + '<span style="font-size:12px;color:var(--ink4)">›</span>'
+        + '</div>';
+    });
+  }
+
+  // Tüm zamanlar özet
+  html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin:16px 0 8px">Tüm Zamanlarda</div>';
+  html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow)">';
+  ['esnaf','musteri','portfoy','mahalle','gorusme'].forEach(function(t){
+    var cnt = byT[t]||0;
+    if(!cnt) return;
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+      + '<span style="font-size:13px">' + ikon[t] + ' ' + lbl[t] + '</span>'
+      + '<span style="font-family:var(--font-head);font-weight:700;font-size:13px;color:' + renk[t] + '">' + cnt + '</span>'
+      + '</div>';
+  });
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 0">'
+    + '<span style="font-size:13px;font-weight:700">Toplam</span>'
+    + '<span style="font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--navy)">' + toplamTum + '</span>'
+    + '</div>';
+  html += '</div>';
+
+  // Export ve sıfırlama butonları
+  html += '<div style="display:flex;gap:8px;margin-top:16px">'
+    + '<button onclick="showExport()" style="flex:1;padding:13px;background:var(--navy);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-head)">📤 Dışa Aktar</button>'
+    + '</div>';
+
+  el.innerHTML = html;
+}
 
 // ══════════════════════════════════════════
 // CHİP HELPERLERİ
@@ -960,18 +1201,42 @@ function save_(tip) {
 
   if(tip==='esnaf') {
     if(!v('e-isletme').trim()){ toast('İşletme adı zorunlu!','err'); return; }
-    d.ad=v('e-isletme').trim(); d.tel=v('e-tel'); d.tip='Etki Çevresi';
+    d.ad=v('e-isletme').trim(); d.tel=v('e-tel'); d.tip='Esnaf';
     d.meslek=v('e-istip'); d.iliski='Esnaf'; d.pipeline='İlk Görüşme';
     var np=['[ESNAF]'];
-    if(v('e-yetkili'))    np.push('Yetkili: '+v('e-yetkili'));
-    if(v('e-kira-durum')) np.push('Mülkiyet: '+v('e-kira-durum'));
-    if(v('e-kira-bedel')) np.push('Kira: ₺'+v('e-kira-bedel'));
-    if(v('e-piyasa'))     np.push('Piyasa: '+v('e-piyasa'));
-    if(v('e-not'))        np.push('Not: '+v('e-not'));
+    if(v('e-yetkili'))         np.push('Yetkili: '+v('e-yetkili'));
+    if(v('e-sure'))            np.push('Süre: '+v('e-sure'));
+    if(v('e-kira-durum'))      np.push('Mülkiyet: '+v('e-kira-durum'));
+    if(v('e-kira-bedel'))      np.push('Kira: ₺'+v('e-kira-bedel'));
+    if(v('e-kira-artis'))      np.push('Kira Artış: '+v('e-kira-artis'));
+    if(v('e-devir-bedel'))     np.push('Devir Bedeli: ₺'+v('e-devir-bedel'));
+    if(v('e-hareketlilik'))    np.push('Hareketlilik: '+v('e-hareketlilik'));
+    if(v('e-eldegistirme'))    np.push('El Değiştirme: '+v('e-eldegistirme'));
+    if(v('e-bos-dukkan'))      np.push('Boş Dükkan: '+v('e-bos-dukkan'));
+    if(v('e-piyasa'))          np.push('Piyasa: '+v('e-piyasa'));
+    if(v('e-referans'))        np.push('Referans: '+v('e-referans'));
+    if(v('e-iletisim'))        np.push('İletişim Tercihi: '+v('e-iletisim'));
+    if(v('e-not'))             np.push('Not: '+v('e-not'));
     d.not=np.join(' | ');
-    d._esnaf_kira_durum=v('e-kira-durum'); d._esnaf_kira_bedel=v('e-kira-bedel'); d._esnaf_piyasa=v('e-piyasa');
+    // Ayrıca erişilebilir alanlar olarak sakla
+    d._esnaf_kira_durum  = v('e-kira-durum');
+    d._esnaf_kira_bedel  = v('e-kira-bedel');
+    d._esnaf_kira_artis  = v('e-kira-artis');
+    d._esnaf_devir_bedel = v('e-devir-bedel');
+    d._esnaf_sure        = v('e-sure');
+    d._esnaf_hareketlilik= v('e-hareketlilik');
+    d._esnaf_eldegistirme= v('e-eldegistirme');
+    d._esnaf_bos_dukkan  = v('e-bos-dukkan');
+    d._esnaf_piyasa      = v('e-piyasa');
+    d._esnaf_referans    = v('e-referans');
+    d._esnaf_iletisim    = v('e-iletisim');
     d._label=d.ad;
-    clearF(['e-isletme','e-yetkili','e-tel','e-kira-bedel','e-piyasa','e-not','e-istip','e-kira-durum'],'esnaf');
+    clearF(['e-isletme','e-yetkili','e-tel','e-kira-bedel','e-devir-bedel','e-piyasa','e-not',
+            'e-istip','e-sure','e-kira-durum','e-kira-artis','e-hareketlilik',
+            'e-eldegistirme','e-bos-dukkan','e-referans','e-iletisim'],'esnaf');
+    // Koşullu alanları sıfırla
+    var kd=document.getElementById('e-kira-detay'); if(kd) kd.style.display='none';
+    var dd=document.getElementById('e-devir-detay'); if(dd) dd.style.display='none';
 
   } else if(tip==='musteri') {
     if(!v('m-ad').trim()){ toast('Ad Soyad zorunlu!','err'); return; }
@@ -1061,13 +1326,12 @@ function saveDB(){
   try {
     var json = JSON.stringify(DB);
     var kb = Math.round((json.length * 2) / 1024);
-    if(kb > 4500) toast('⚠️ Depolama dolmak üzere! Dışa aktarın.');
+    if(kb > 4500) toast('⚠️ Depolama dolmak üzere! Dışa aktarın.','warn');
     localStorage.setItem('saha_crm_v2', json);
-    // Otomatik yedek
     localStorage.setItem('saha_crm_v2_backup', json);
     updBadge();
   } catch(e) {
-    toast('❌ Kayıt başarısız! Depolama dolu olabilir, dışa aktarın.');
+    toast('❌ Kayıt başarısız! Depolama dolu olabilir.','err');
   }
 }
 
@@ -1104,17 +1368,49 @@ function updBadge(){
 function showDetail(idx){
   var r=DB[idx]; if(!r) return;
   document.getElementById('dtitle').textContent = r._label||TIP_LBL[r._tip]||'Kayıt';
-  var html=Object.keys(r).filter(k=>!SKIP.includes(k)&&r[k]&&r[k]!=='').map(k=>{
-    var lbl=LABELS[k]||k;
-    return `<div class="drow"><span class="dlbl">${lbl}</span><span class="dval">${esc(String(r[k]))}</span></div>`;
-  }).join('');
-  if(r.sokaklar&&r.sokaklar.length){
-    html+=r.sokaklar.map((s,i)=>
-      `<div class="drow"><span class="dlbl">Sokak ${i+1}</span><span class="dval">${esc(s.ad||'—')}${s.manzara?' · '+s.manzara:''}${s.trafik?' · '+s.trafik:''}</span></div>`
-    ).join('');
+
+  var html='';
+
+  // Esnaf için özel zengin görünüm
+  if(r._tip==='esnaf'){
+    // Temel bilgiler
+    if(r.meslek) html+=`<div class="drow"><span class="dlbl">İş Tipi</span><span class="dval">${esc(r.meslek)}</span></div>`;
+    if(r.tel)    html+=`<div class="drow"><span class="dlbl">Telefon</span><span class="dval">${esc(r.tel)}</span></div>`;
+    // Mülkiyet blok
+    var kiraDurum = r._esnaf_kira_durum||'';
+    if(kiraDurum){
+      html+=`<div class="drow"><span class="dlbl">Mülkiyet</span><span class="dval" style="font-weight:700;color:${kiraDurum==='Devir'?'var(--green)':kiraDurum==='Kiracı'?'var(--orange)':'var(--navy)'}">${esc(kiraDurum)}</span></div>`;
+    }
+    if(r._esnaf_kira_bedel)  html+=`<div class="drow"><span class="dlbl">Kira (₺/ay)</span><span class="dval">₺${esc(r._esnaf_kira_bedel)}</span></div>`;
+    if(r._esnaf_kira_artis)  html+=`<div class="drow"><span class="dlbl">Kira Artış Beklentisi</span><span class="dval">${esc(r._esnaf_kira_artis)}</span></div>`;
+    if(r._esnaf_devir_bedel) html+=`<div class="drow"><span class="dlbl">Devir Bedeli (₺)</span><span class="dval" style="color:var(--green);font-weight:700">₺${esc(r._esnaf_devir_bedel)}</span></div>`;
+    if(r._esnaf_sure)        html+=`<div class="drow"><span class="dlbl">İşyerinde Süre</span><span class="dval">${esc(r._esnaf_sure)}</span></div>`;
+    // Piyasa blok
+    if(r._esnaf_hareketlilik)  html+=`<div class="drow"><span class="dlbl">Bölge Hareketliliği</span><span class="dval">${esc(r._esnaf_hareketlilik)}</span></div>`;
+    if(r._esnaf_eldegistirme)  html+=`<div class="drow"><span class="dlbl">El Değiştirme</span><span class="dval">${esc(r._esnaf_eldegistirme)}</span></div>`;
+    if(r._esnaf_bos_dukkan)    html+=`<div class="drow"><span class="dlbl">Boş Dükkan</span><span class="dval">${esc(r._esnaf_bos_dukkan)}</span></div>`;
+    if(r._esnaf_piyasa)        html+=`<div class="drow"><span class="dlbl">Piyasa Yorumu</span><span class="dval">${esc(r._esnaf_piyasa)}</span></div>`;
+    // Referans
+    var refRenk = r._esnaf_referans==='Evet'?'var(--green)':r._esnaf_referans==='Belki'?'var(--orange)':'var(--ink3)';
+    if(r._esnaf_referans)  html+=`<div class="drow"><span class="dlbl">Referans Potansiyeli</span><span class="dval" style="color:${refRenk};font-weight:700">${esc(r._esnaf_referans)}</span></div>`;
+    if(r._esnaf_iletisim)  html+=`<div class="drow"><span class="dlbl">İletişim Tercihi</span><span class="dval">${esc(r._esnaf_iletisim)}</span></div>`;
+    // Not
+    var notTemiz = (r.not||'').split(' | ').filter(function(p){return p.startsWith('Not: ');}).map(function(p){return p.replace('Not: ','');}).join('');
+    if(notTemiz) html+=`<div class="drow"><span class="dlbl">Notlarım</span><span class="dval">${esc(notTemiz)}</span></div>`;
+  } else {
+    // Diğer tipler için standart gösterim
+    html=Object.keys(r).filter(function(k){return !SKIP.includes(k)&&r[k]&&r[k]!=='';}).map(function(k){
+      var lbl=LABELS[k]||k;
+      return `<div class="drow"><span class="dlbl">${lbl}</span><span class="dval">${esc(String(r[k]))}</span></div>`;
+    }).join('');
+    if(r.sokaklar&&r.sokaklar.length){
+      html+=r.sokaklar.map(function(s,i){
+        return `<div class="drow"><span class="dlbl">Sokak ${i+1}</span><span class="dval">${esc(s.ad||'—')}${s.manzara?' · '+s.manzara:''}${s.trafik?' · '+s.trafik:''}</span></div>`;
+      }).join('');
+    }
   }
+
   html+=`<div class="drow" style="border:none"><span class="dlbl" style="color:var(--ink4);font-size:11px">Kayıt zamanı</span><span class="dval" style="color:var(--ink3);font-size:12px">${r._zamanTR}</span></div>`;
-  // Düzenle + Sil butonları
   html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
     <button onclick="editRecord(${idx})" style="padding:12px;background:var(--navy-pale);border:1.5px solid rgba(0,61,165,0.3);border-radius:var(--r);color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">✏️ Düzenle</button>
     <button onclick="delRec(${idx})" style="padding:12px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">🗑 Sil</button>
@@ -1129,24 +1425,31 @@ function editRecord(idx){
   _editIdx = idx;
 
   if(r._tip==='esnaf'){
-    // Esnaf not alanını parse et
     document.getElementById('e-isletme').value = r.ad||'';
     document.getElementById('e-tel').value      = r.tel||'';
-    // Nottan ayrıştır
-    var yetkili='', kiraDurum='', kiraBedel='', piyasa='', not_='';
+    document.getElementById('e-yetkili').value  = r._esnaf_yetkili||'';
+    document.getElementById('e-kira-bedel').value  = r._esnaf_kira_bedel||'';
+    document.getElementById('e-devir-bedel').value = r._esnaf_devir_bedel||'';
+    document.getElementById('e-piyasa').value      = r._esnaf_piyasa||'';
+    document.getElementById('e-not').value         = '';
+    // Not alanından eski format parse et (geriye dönük uyumluluk)
     (r.not||'').split(' | ').forEach(function(p){
-      if(p.startsWith('Yetkili: '))    yetkili   = p.replace('Yetkili: ','');
-      if(p.startsWith('Mülkiyet: '))   kiraDurum = p.replace('Mülkiyet: ','');
-      if(p.startsWith('Kira: ₺'))      kiraBedel = p.replace('Kira: ₺','');
-      if(p.startsWith('Piyasa: '))     piyasa    = p.replace('Piyasa: ','');
-      if(p.startsWith('Not: '))        not_      = p.replace('Not: ','');
+      if(p.startsWith('Not: ')) document.getElementById('e-not').value = p.replace('Not: ','');
+      if(!r._esnaf_kira_bedel && p.startsWith('Kira: ₺')) document.getElementById('e-kira-bedel').value = p.replace('Kira: ₺','');
+      if(!r._esnaf_piyasa && p.startsWith('Piyasa: ')) document.getElementById('e-piyasa').value = p.replace('Piyasa: ','');
     });
-    document.getElementById('e-yetkili').value    = r._esnaf_yetkili||yetkili;
-    document.getElementById('e-kira-bedel').value = r._esnaf_kira_bedel||kiraBedel;
-    document.getElementById('e-piyasa').value      = r._esnaf_piyasa||piyasa;
-    document.getElementById('e-not').value         = not_;
-    setChip('s-esnaf', 'e-istip',     r.meslek||'');
-    setChip('s-esnaf', 'e-kira-durum', r._esnaf_kira_durum||kiraDurum);
+    // Chip'leri ayarla
+    setChip('s-esnaf', 'e-istip',          r.meslek||'');
+    setChip('s-esnaf', 'e-sure',            r._esnaf_sure||'');
+    setChip('s-esnaf', 'e-kira-durum',      r._esnaf_kira_durum||'');
+    setChip('s-esnaf', 'e-kira-artis',      r._esnaf_kira_artis||'');
+    setChip('s-esnaf', 'e-hareketlilik',    r._esnaf_hareketlilik||'');
+    setChip('s-esnaf', 'e-eldegistirme',    r._esnaf_eldegistirme||'');
+    setChip('s-esnaf', 'e-bos-dukkan',      r._esnaf_bos_dukkan||'');
+    setChip('s-esnaf', 'e-referans',        r._esnaf_referans||'');
+    setChip('s-esnaf', 'e-iletisim',        r._esnaf_iletisim||'');
+    // Koşullu alanları göster
+    esnafKiraToggle(r._esnaf_kira_durum||'');
     goTo('esnaf');
 
   } else if(r._tip==='musteri'){
@@ -1299,54 +1602,9 @@ function setSelect2(el, value){
     if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
   }
 }
-function delRec(idx){
-  // confirm() yerine uygulama içi onay — GitHub Pages / PWA uyumlu
-  var dbody = document.getElementById('dbody');
-  if(!dbody) return;
-  // Önceki onay kutusu varsa kaldır
-  var eskiOnay = document.getElementById('saha-sil-onay');
-  if(eskiOnay) eskiOnay.remove();
-  var onay = document.createElement('div');
-  onay.id = 'saha-sil-onay';
-  onay.style.cssText = 'background:#fff0f0;border:1px solid rgba(204,0,0,0.3);border-radius:10px;padding:14px;margin-top:12px';
-  onay.innerHTML = '<div style="font-size:13px;color:#CC0000;font-weight:700;margin-bottom:10px">Bu kayıt silinecek. Emin misiniz?</div>'
-    + '<div style="display:flex;gap:8px">'
-    + '<button onclick="delRecOnayla('+idx+')" style="flex:1;padding:10px;background:#CC0000;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Evet, Sil</button>'
-    + '<button onclick="document.getElementById(\'saha-sil-onay\').remove()" style="flex:1;padding:10px;background:#fff;color:#444;border:1.5px solid #ddd;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">İptal</button>'
-    + '</div>';
-  dbody.appendChild(onay);
-}
-
-function delRecOnayla(idx){
-  DB.splice(idx,1);
-  saveDB();
-  closeDMbtn();
-  renderHome();
-  toast('🗑️ Kayıt silindi');
-}
-
-function clearAll(){
-  var el = document.getElementById('export-body');
-  if(!el) return;
-  var eskiOnay = document.getElementById('saha-clearall-onay');
-  if(eskiOnay) { eskiOnay.style.display = eskiOnay.style.display==='none'?'block':'none'; return; }
-  var onay = document.createElement('div');
-  onay.id = 'saha-clearall-onay';
-  onay.style.cssText = 'background:#fff0f0;border:1px solid rgba(204,0,0,0.3);border-radius:10px;padding:14px;margin-top:10px';
-  onay.innerHTML = '<div style="font-size:13px;color:#CC0000;font-weight:700;margin-bottom:10px">Tüm '+DB.length+' kayıt silinecek. Bu işlem geri alınamaz!</div>'
-    + '<div style="display:flex;gap:8px">'
-    + '<button onclick="clearAllOnayla()" style="flex:1;padding:10px;background:#CC0000;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Evet, Tümünü Sil</button>'
-    + '<button onclick="document.getElementById(\'saha-clearall-onay\').style.display=\'none\'" style="flex:1;padding:10px;background:#fff;color:#444;border:1.5px solid #ddd;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer">İptal</button>'
-    + '</div>';
-  el.insertBefore(onay, el.firstChild);
-}
-
-function clearAllOnayla(){
-  DB.length=0; saveDB(); renderHome(); goBack();
-}
-
 function closeDM(e){ if(e.target===document.getElementById('dmodal')) closeDMbtn(); }
 function closeDMbtn(){ document.getElementById('dmodal').classList.remove('open'); }
+
 // ══════════════════════════════════════════
 // EXPORT
 // ══════════════════════════════════════════
