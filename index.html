@@ -93,7 +93,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 .home-greeting p  { font-size: 13px; color: var(--ink3); margin-top: 3px; }
 
 /* ── SENARYO KARTLARI ── */
-.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px 14px; }
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px 14px; align-items: start; }
 .sc {
   background: var(--surface); border: 1.5px solid var(--border);
   border-radius: 12px; padding: 16px 14px 14px;
@@ -114,7 +114,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   border-radius: 12px; padding: 13px 14px;
   cursor: pointer; display: flex; align-items: center; gap: 12px;
   box-shadow: var(--shadow); margin: 0 16px 14px;
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden; box-sizing: border-box;
+  width: calc(100% - 32px); min-width: 0;
   transition: transform 0.12s; -webkit-user-select: none; user-select: none;
 }
 .sc-wide:active { transform: scale(0.98); }
@@ -208,6 +209,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   box-shadow: 0 0 0 3px rgba(0,61,165,0.10);
 }
 .fg textarea { resize: none; min-height: 72px; line-height: 1.5; }
+.fg textarea.sk-auto { min-height: 44px; overflow: hidden; }
 .fg select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23737A94' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 12px center; background-color: var(--bg);
@@ -1230,6 +1232,7 @@ function save_(tip) {
     d._esnaf_piyasa      = v('e-piyasa');
     d._esnaf_referans    = v('e-referans');
     d._esnaf_iletisim    = v('e-iletisim');
+    d._esnaf_yetkili     = v('e-yetkili');
     d._label=d.ad;
     clearF(['e-isletme','e-yetkili','e-tel','e-kira-bedel','e-devir-bedel','e-piyasa','e-not',
             'e-istip','e-sure','e-kira-durum','e-kira-artis','e-hareketlilik',
@@ -1585,8 +1588,8 @@ function addSokakWithData(s){
         <div class="fg"><label>Yeşil Alan</label><select class="sk-ysl"><option value="">—</option><option>Yok</option><option>Az</option><option>Orta</option><option>Bol</option></select></div>
         <div class="fg"><label>Toplu Taşıma</label><select class="sk-uls"><option value="">—</option><option>Yakın (yürüme)</option><option>Orta Mesafe</option><option>Uzak</option></select></div>
       </div>
-      <div class="fg"><label>Temel İhtiyaç Noktaları</label><input type="text" class="sk-iht" value="${esc(s.ihtiyac_noktalari||s.ihtiyacNoktalari||'')}" placeholder="Market, eczane, okul..." autocomplete="off"></div>
-      <div class="fg"><label>Sokak Notu</label><input type="text" class="sk-not" value="${esc(s.not||'')}" placeholder="Bu sokakla ilgili notunuz" autocomplete="off"></div>
+      <div class="fg"><label>Temel İhtiyaç Noktaları</label><textarea class="sk-iht sk-auto" rows="2" placeholder="Market, eczane, okul...">${esc(s.ihtiyac_noktalari||s.ihtiyacNoktalari||'')}</textarea></div>
+      <div class="fg"><label>Sokak Notu</label><textarea class="sk-not sk-auto" rows="2" placeholder="Bu sokakla ilgili notunuz">${esc(s.not||'')}</textarea></div>
     </div>`;
   c.appendChild(div);
   // Select değerlerini ayarla
@@ -1594,6 +1597,16 @@ function addSokakWithData(s){
   setSelect2(div.querySelector('.sk-trf'), s.trafik||'');
   setSelect2(div.querySelector('.sk-ysl'), s.yesil_alan||s.yesilAlan||'');
   setSelect2(div.querySelector('.sk-uls'), s.toplu_tasima||s.topluTasima||'');
+  // Auto-expand textarea'ları bağla ve mevcut içerik için boyutu ayarla
+  div.querySelectorAll('.sk-auto').forEach(function(ta){
+    autoExpand(ta);
+    ta.addEventListener('input', function(){ autoExpand(this); });
+  });
+}
+
+function autoExpand(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
 
 function setSelect2(el, value){
