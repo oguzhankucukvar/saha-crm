@@ -381,13 +381,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
         <h3>Mahalle Notu</h3>
         <p>Bölge & sokak analizi</p>
       </div>
-    </div>
-
-    <div class="sc-wide" onclick="goTo('gorusme')">
-      <div class="sc-stripe" style="background:#1a5fa0;height:100%;width:3px;border-radius:3px 0 0 3px;position:absolute;left:0;top:0;"></div>
-      <span class="sc-wide-ic">📞</span>
-      <div style="flex:1;min-width:0"><h3>Görüşme Notu</h3><p>Mevcut müşteriyle görüşme kaydet</p></div>
-      <span class="sc-wide-arr">›</span>
+      <div class="sc" style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:14px 14px" onclick="goTo('gorusme')">
+        <div class="sc-stripe" style="background:#1a5fa0"></div>
+        <span style="font-size:20px;flex-shrink:0">📞</span>
+        <div style="flex:1;min-width:0">
+          <h3>Görüşme Notu</h3>
+          <p>Mevcut müşteriyle görüşme kaydet</p>
+        </div>
+        <span style="color:var(--ink4);font-size:16px;flex-shrink:0">›</span>
+      </div>
     </div>
 
     <div class="sec-head">
