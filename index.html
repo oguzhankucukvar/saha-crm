@@ -2,1323 +2,1729 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#003DA5">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Toplantı Asistanı</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Saha CRM">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#003DA5">
+<title>Saha CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Saha CRM&quot;,&quot;short_name&quot;:&quot;SahaCRM&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23f4f6fb&quot;,&quot;theme_color&quot;:&quot;%23003DA5&quot;,&quot;orientation&quot;:&quot;portrait&quot;}">
 <style>
-:root{
-  --navy:#003DA5;--navy-d:#002d7a;--navy-p:#E0E8F7;
-  --red:#CC0000;--green:#1A7A45;--green-p:#E6F4EC;
-  --orange:#E65C00;--gold:#d4a017;--gold-p:#FFF8E1;
-  --bg:#f4f6fb;--surface:#fff;--ink:#1a1d2e;--ink2:#4a5068;--ink3:#737A94;
-  --border:#dde2ef;--r:12px;--sh:0 2px 12px rgba(0,61,165,.09);--sh2:0 6px 24px rgba(0,61,165,.14)
+/* ── CRM Renk Paleti (birebir) ── */
+:root {
+  --navy:      #003DA5;
+  --navy-l:    #1a56c4;
+  --navy-pale: #E0E8F7;
+  --red:       #CC0000;
+  --red-pale:  #fdeaea;
+  --green:     #1A7A45;
+  --green-pale:#e6f4ec;
+  --orange:    #E65C00;
+  --gold:      #d4a017;
+  --gray:      #8a827a;
+  --bg:        #f4f6fb;
+  --surface:   #ffffff;
+  --surface2:  #f0f3fa;
+  --ink:       #1a1d2e;
+  --ink2:      #3a3f52;
+  --ink3:      #737A94;
+  --ink4:      #adb5c8;
+  --border:    rgba(0,0,0,0.10);
+  --border2:   rgba(0,0,0,0.18);
+  --r:         10px;
+  --rs:        8px;
+  --shadow:    0 2px 12px rgba(0,61,165,0.08);
+  --shadow-md: 0 4px 20px rgba(0,61,165,0.13);
+  --font-head: 'Montserrat', sans-serif;
+  --font:      'Open Sans', sans-serif;
+  --sbt:       env(safe-area-inset-bottom, 0px);
+  --stt:       env(safe-area-inset-top, 0px);
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'Open Sans',sans-serif;font-size:14px}
-body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 
-/* TOPBAR */
-.topbar{position:sticky;top:0;z-index:100;background:var(--navy);color:#fff;height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.tlogo{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px}
-.tlogo em{color:var(--red);font-style:normal}
-.tsub{font-size:11px;opacity:.7;margin-left:6px;font-weight:400}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
 
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:99;box-shadow:0 -2px 10px rgba(0,0,0,.07)}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0;cursor:pointer;color:var(--ink3);font-size:10px;font-weight:600;gap:2px;transition:color .15s}
-.bni .ic{font-size:21px}
-.bni.on{color:var(--navy)}
+/* ── LAYOUT ── */
+#app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; background: var(--bg); }
 
-/* SCREENS */
-.scr{display:none;padding:16px;max-width:640px;margin:0 auto}
-.scr.on{display:block}
+/* ── HEADER — CRM lacivert sidebar rengi ── */
+.hdr {
+  background: var(--navy);
+  padding: calc(var(--stt) + 12px) 16px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: relative; z-index: 10; flex-shrink: 0;
+}
+.hdr-brand { display: flex; align-items: center; gap: 10px; }
+.hdr-badge {
+  background: var(--red); color: #fff;
+  font-family: var(--font-head); font-size: 9px; font-weight: 800;
+  padding: 2px 5px; border-radius: 3px; letter-spacing: 0.05em;
+  line-height: 1.4; flex-shrink: 0;
+}
+.hdr-title { color: #fff; font-family: var(--font-head); font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.hdr-sub   { color: rgba(255,255,255,0.65); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
+.hdr-right { display: flex; gap: 6px; }
+.hdr-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; color: #fff; position: relative;
+  transition: background 0.15s;
+}
+.hdr-btn:active { background: rgba(255,255,255,0.25); }
+.bcnt {
+  position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px;
+  background: var(--red); border-radius: 9px; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  border: 2px solid var(--navy); padding: 0 3px;
+}
 
-/* FORM */
-.fg{margin-bottom:13px}
-.fg label{display:block;font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Open Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface);-webkit-appearance:none;transition:border-color .15s}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--navy)}
-.fg textarea{resize:vertical;min-height:60px;line-height:1.5}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* ── SCREENS ── */
+.screen { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+.screen.active { display: flex; flex-direction: column; }
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:9px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .15s;min-height:44px;width:100%}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--navy);color:#fff}
-.btn-green{background:var(--green);color:#fff}
-.btn-ghost{background:var(--surface);color:var(--ink2);border:1.5px solid var(--border);width:auto;padding:9px 16px;font-size:12px;min-height:38px}
-.btn-ghost:hover{border-color:var(--navy);color:var(--navy)}
-.btn-sm{width:auto;padding:7px 14px;font-size:12px;min-height:36px;border-radius:8px}
-.btn-add{background:var(--navy-p);color:var(--navy);border:1.5px dashed var(--navy);width:100%;padding:10px;border-radius:8px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
+/* ── HOME ── */
+.home-greeting { padding: 18px 16px 10px; }
+.home-date-lbl { font-size: 11px; color: var(--ink3); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.home-greeting h2 { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--ink); }
+.home-greeting p  { font-size: 13px; color: var(--ink3); margin-top: 3px; }
 
-/* CARD */
-.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
-.card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--navy);margin-bottom:12px}
+/* ── SENARYO KARTLARI ── */
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px 14px; align-items: start; }
+.sc {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 14px 14px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: var(--shadow);
+  -webkit-user-select: none; user-select: none;
+}
+.sc:active { transform: scale(0.96); box-shadow: none; }
+.sc-stripe { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.sc-ic { font-size: 22px; margin-bottom: 10px; display: block; }
+.sc h3 { font-family: var(--font-head); font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.sc p  { font-size: 11px; color: var(--ink3); margin-top: 3px; }
 
-/* TİP SEÇİM */
-.tip-grid{display:flex;flex-direction:column;gap:10px}
-.tip-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;border:2px solid transparent;transition:all .18s}
-.tip-card:active{transform:scale(.98)}
-.tip-card.sel{border-color:var(--navy);background:var(--navy-p)}
-.tip-icon{font-size:28px;flex-shrink:0}
-.tip-lbl{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;color:var(--navy)}
-.tip-desc{font-size:12px;color:var(--ink3);margin-top:2px}
-.tip-cnt{margin-left:auto;background:var(--navy-p);color:var(--navy);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0}
+/* Kişi görüşme tek satır kart */
+.sc-wide {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 14px;
+  cursor: pointer; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow); margin: 0 16px 14px;
+  position: relative; overflow: hidden; box-sizing: border-box;
+  width: calc(100% - 32px); min-width: 0;
+  transition: transform 0.12s; -webkit-user-select: none; user-select: none;
+}
+.sc-wide:active { transform: scale(0.98); }
+.sc-wide-ic { font-size: 20px; flex-shrink: 0; }
+.sc-wide h3 { font-family: var(--font-head); font-size: 12px; font-weight: 700; color: var(--ink); }
+.sc-wide p  { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.sc-wide-arr { margin-left: auto; color: var(--ink4); font-size: 14px; flex-shrink: 0; }
 
-/* CHIP */
-.chip-row{display:flex;flex-wrap:wrap;gap:6px}
-.chip{padding:7px 13px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);transition:all .12s;color:var(--ink2)}
-.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
-.chip:active{transform:scale(.95)}
-.ilgi-row{display:flex;gap:6px}
-.ilgi-chip{padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);flex:1;text-align:center;transition:all .12s}
-.ilgi-chip.on{border-color:var(--navy);background:var(--navy-p);color:var(--navy)}
+/* ── KAYITLAR ── */
+.sec-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 8px; }
+.sec-head h4 { font-size: 11px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.07em; }
+.sec-head span { font-size: 11px; color: var(--ink3); }
+.rlist { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
+.ri {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; box-shadow: var(--shadow);
+  transition: transform 0.1s;
+}
+.ri:active { transform: scale(0.99); }
+.rdot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.rinfo { flex: 1; min-width: 0; }
+.rinfo .rn { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rinfo .rs { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.rt { font-size: 11px; color: var(--ink4); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.empty { text-align: center; color: var(--ink4); font-size: 13px; padding: 24px 0; }
 
-/* SORU KARTI */
-.q-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:10px;border-left:4px solid var(--border);transition:border-color .2s;animation:fadeUp .25s ease both}
-.q-card.done{border-left-color:var(--green)}
-.q-card.active{border-left-color:var(--navy)}
-.q-card.kosul{border-left-color:var(--gold)}
-.q-num{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
-.kosul-badge{background:var(--gold-p);color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700}
-.q-text{font-size:14px;font-weight:600;color:var(--ink);line-height:1.5;margin-bottom:8px}
-.q-hint{font-size:12px;color:var(--ink3);margin-bottom:8px;font-style:italic}
-.q-ans{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'Open Sans',sans-serif;font-size:13px;background:var(--bg);resize:none;min-height:58px;color:var(--ink);transition:border-color .15s}
-.q-ans:focus{outline:none;border-color:var(--navy);background:var(--surface)}
+/* ── EXPORT BUTONU ── */
+.exp-bar { margin: 6px 16px 14px; }
+.exp-btn {
+  width: 100%; background: var(--navy); border: none;
+  border-radius: var(--r); padding: 13px 16px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); box-shadow: var(--shadow-md);
+  transition: opacity 0.15s;
+}
+.exp-btn:active { opacity: 0.85; }
+.exp-cnt { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 4px; }
 
-/* RİSK NOTU */
-.risk-note{margin-top:8px;padding:9px 12px;border-radius:8px;font-size:12px;line-height:1.6;display:flex;align-items:flex-start;gap:7px}
-.risk-red{background:#fff0f0;border:1px solid #f5c6c6;color:#7b0000}
-.risk-yellow{background:var(--gold-p);border:1px solid #ffe082;color:#5d4200}
-.risk-green{background:var(--green-p);border:1px solid #a8d5bc;color:#0a3d20}
-.risk-blue{background:var(--navy-p);border:1px solid #b8ccee;color:#001e6b}
+#install-btn {
+  width: 100%; background: transparent; border: 1.5px solid var(--navy);
+  border-radius: var(--r); padding: 11px 16px; color: var(--navy);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); display: none;
+  align-items: center; justify-content: center; gap: 8px;
+  margin: 0 16px 14px; width: calc(100% - 32px);
+}
 
-/* DAİRE TİPİ */
-.dt-row{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative}
-.dt-grid{display:grid;grid-template-columns:90px 55px 1fr 1fr 1fr;gap:6px;align-items:end}
-.dt-grid2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
-.dt-lbl{font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;margin-bottom:3px}
-.dt-inp{width:100%;padding:7px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:'Open Sans',sans-serif;color:var(--ink);background:var(--surface)}
-.dt-inp:focus{outline:none;border-color:var(--navy)}
-.dt-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:14px;padding:2px}
+.bpad { height: calc(16px + var(--sbt)); }
 
-/* EK SORU SATIRI */
-.ek-row{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative}
-.ek-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ek-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:14px}
+/* ── FORM SCREENS ── */
+.fhdr {
+  background: var(--surface); border-bottom: 1.5px solid var(--border);
+  padding: 10px 16px 12px;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.bbtn {
+  width: 34px; height: 34px; border-radius: var(--rs);
+  background: var(--surface2); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; color: var(--ink3); flex-shrink: 0;
+  transition: background 0.15s;
+}
+.bbtn:active { background: var(--navy-pale); }
+.fhi { flex: 1; min-width: 0; }
+.fhi h2 { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--ink); }
+.fhi p  { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.fpill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; letter-spacing: 0.03em; }
 
-/* ÖZET */
-.oz-sec{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
-.oz-sec h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--navy);margin-bottom:10px}
-.oz-txt{font-size:13px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
+/* ── FORM BODY ── */
+.fbody { padding: 14px 16px 100px; display: flex; flex-direction: column; gap: 14px; }
+.fsec { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+.fsec-label { font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
 
-/* PROG */
-.prog-bar{height:4px;background:var(--border);border-radius:99px;margin-bottom:16px;overflow:hidden}
-.prog-fill{height:100%;background:var(--navy);border-radius:99px;transition:width .4s}
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 11px; font-weight: 600; color: var(--ink3); letter-spacing: 0.03em; }
+.fg input, .fg textarea, .fg select {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--rs); color: var(--ink);
+  font-size: 14px; font-family: var(--font);
+  padding: 10px 12px; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.fg input:focus, .fg textarea:focus, .fg select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(0,61,165,0.10);
+}
+.fg textarea { resize: none; min-height: 72px; line-height: 1.5; }
+.fg textarea.sk-auto { min-height: 44px; overflow: hidden; }
+.fg select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23737A94' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-color: var(--bg);
+  padding-right: 34px; cursor: pointer;
+}
+.fg input::placeholder, .fg textarea::placeholder { color: var(--ink4); }
 
-/* GEÇMİŞ */
-.hist-item{background:var(--surface);border-radius:10px;box-shadow:var(--sh);padding:13px 15px;margin-bottom:9px;border-left:3px solid var(--navy);cursor:pointer}
-.hi-row{display:flex;justify-content:space-between;align-items:flex-start}
-.hi-name{font-weight:700;font-size:14px}
-.hi-date{font-size:11px;color:var(--ink3)}
-.hi-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.tag{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
-.tag-n{background:var(--navy-p);color:var(--navy)}
-.tag-g{background:var(--green-p);color:var(--green)}
-.tag-o{background:#FFF3E0;color:var(--orange)}
-.tag-r{background:#fff0f0;color:var(--red)}
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.frow .fg { margin: 0; }
 
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-bg.on{display:flex}
-.modal{background:var(--surface);border-radius:16px;padding:22px 18px;width:100%;max-width:420px;box-shadow:var(--sh2)}
-.modal h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;color:var(--navy);margin-bottom:14px}
+.fdiv { font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.fdiv::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* TOAST */
-.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:var(--sh2);transition:transform .28s ease, opacity .28s ease;z-index:9999;white-space:nowrap;pointer-events:none;opacity:0}
-.toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+/* ── CHİPLER — CRM pbtn stili ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 5px 13px;
+  font-size: 12px; color: var(--ink3); cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+  -webkit-user-select: none; user-select: none; font-weight: 500;
+}
+.chip:active { transform: scale(0.96); }
+.chip.on {
+  background: var(--navy); border-color: var(--navy);
+  color: #fff; font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,61,165,0.25);
+}
 
-/* UTILS */
-.div{height:1px;background:var(--border);margin:14px 0}
-.sec-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px}
-.empty{text-align:center;padding:48px 0;color:var(--ink3)}
-.info-box{background:var(--navy-p);border-radius:10px;padding:12px 14px}
-.info-box ol{font-size:12px;color:var(--ink2);line-height:2.1;margin-left:16px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ── SOKAK KARTLARI ── */
+.skcard {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 12px; margin-bottom: 0;
+}
+.skhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.skhead span { font-size: 12px; font-weight: 700; color: var(--green); font-family: var(--font-head); }
+.skhead button { font-size: 11px; color: var(--red); background: none; border: none; cursor: pointer; font-family: var(--font); font-weight: 600; }
+.add-sk {
+  width: 100%; border: 2px dashed var(--border2);
+  background: transparent; border-radius: var(--rs);
+  padding: 10px; color: var(--ink3); font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--font); font-weight: 600; transition: all 0.15s;
+}
+.add-sk:active { border-color: var(--navy); color: var(--navy); }
+
+/* ── KAYDET ÇUBUĞU ── */
+.savebar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  padding: 10px 16px calc(10px + var(--sbt));
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  z-index: 20;
+}
+.savebtn {
+  width: 100%; padding: 14px; border-radius: var(--r);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; color: white; font-family: var(--font-head);
+  letter-spacing: 0.01em; transition: opacity 0.12s, transform 0.1s;
+  box-shadow: var(--shadow-md);
+}
+.savebtn:active { opacity: 0.85; transform: scale(0.99); }
+.btn-navy  { background: var(--navy); }
+.btn-red   { background: var(--red); }
+.btn-green { background: var(--green); }
+.btn-orange{ background: var(--orange); }
+.btn-blue  { background: #1a5fa0; }
+
+/* ── DETAIL MODAL ── */
+.dmodal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50; display: none; align-items: flex-end; }
+.dmodal.open { display: flex; }
+.dsheet {
+  background: var(--surface); border-radius: 18px 18px 0 0;
+  padding: 20px 16px calc(24px + var(--sbt));
+  width: 100%; max-width: 480px; margin: 0 auto;
+  max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.12);
+}
+.dhandle { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
+.dtitle { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
+.drow { display: flex; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.drow:last-child { border: none; }
+.dlbl { font-size: 12px; color: var(--ink3); width: 110px; flex-shrink: 0; line-height: 1.5; font-weight: 500; }
+.dval { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; line-height: 1.5; word-break: break-word; }
+.dclose {
+  width: 100%; margin-top: 14px; padding: 12px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r); color: var(--ink3); font-size: 14px;
+  cursor: pointer; font-family: var(--font); font-weight: 600;
+}
+
+/* ── EXPORT SCREEN ── */
+.import-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; background: var(--surface2); margin-bottom: 5px; border: 1px solid var(--border); }
+
+/* ── INFO KUTUSU ── */
+.info-box {
+  background: var(--navy-pale); border: 1px solid rgba(0,61,165,0.2);
+  border-radius: var(--rs); padding: 10px 13px;
+  font-size: 12px; color: var(--ink2); line-height: 1.6;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: calc(80px + var(--sbt)); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green); color: white;
+  border-radius: var(--r); padding: 11px 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap; z-index: 100; pointer-events: none;
+  font-family: var(--font); box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err  { background: var(--red); }
+.toast.warn { background: var(--orange); }
+
+::-webkit-scrollbar { width: 0; }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div class="topbar">
-  <div style="cursor:pointer" onclick="goNav('yeni')"><span class="tlogo">RE<em>/</em>MAX<span class="tsub">Toplantı Asistanı</span></span></div>
-  <button style="background:rgba(255,255,255,.13);border:none;color:#fff;border-radius:8px;padding:6px 10px;font-size:17px;cursor:pointer" onclick="openSettings()">⚙️</button>
-</div>
-
-<div class="bnav">
-  <div class="bni on" id="bni-yeni" onclick="goNav('yeni')"><span class="ic">➕</span>Yeni</div>
-  <div class="bni" id="bni-gecmis" onclick="goNav('gecmis')"><span class="ic">📋</span>Geçmiş</div>
-  <div class="bni" id="bni-export" onclick="goNav('export')"><span class="ic">📤</span>Export</div>
-</div>
-
-<!-- YENİ TOPLANTI -->
-<div class="scr on" id="sc-yeni">
-
-  <!-- A: Tip + Katılımcı -->
-  <div id="asama-tip">
-    <div class="sec-title" style="margin-top:4px">Görüşme Tipi</div>
-    <div class="tip-grid" style="margin-bottom:16px">
-      <div class="tip-card" onclick="secTip('Müteahhit',this)">
-        <div class="tip-icon">🏗️</div>
-        <div><div class="tip-lbl">Müteahhit</div><div class="tip-desc">Proje, daire, fiyat, satış bilgileri</div></div>
-        <div class="tip-cnt">Portföy + Görüşme</div>
-      </div>
-      <div class="tip-card" onclick="secTip('Satıcı',this)">
-        <div class="tip-icon">🏠</div>
-        <div><div class="tip-lbl">Satıcı</div><div class="tip-desc">Mülk detayı, fiyat, tapu, motivasyon</div></div>
-        <div class="tip-cnt">Portföy + Görüşme</div>
-      </div>
-      <div class="tip-card" onclick="secTip('Alıcı',this)">
-        <div class="tip-icon">💼</div>
-        <div><div class="tip-lbl">Alıcı</div><div class="tip-desc">Bütçe, tercih, bölge, finansman</div></div>
-        <div class="tip-cnt">Görüşme</div>
-      </div>
-    </div>
-    <div class="div"></div>
-    <div class="sec-title">Katılımcı Bilgisi</div>
-    <div class="g2">
-      <div class="fg"><label>Ad Soyad *</label><input type="text" id="t-musteri" placeholder="Müşteri adı"></div>
-      <div class="fg"><label>Şirket / Proje</label><input type="text" id="t-sirket" placeholder="Opsiyonel"></div>
-    </div>
-    <div class="fg"><label>İlgi Seviyesi</label>
-      <div class="ilgi-row">
-        <div class="ilgi-chip on" data-v="🔥 Çok Sıcak" onclick="setIlgi(this)">🔥 Sıcak</div>
-        <div class="ilgi-chip" data-v="✅ İlgili" onclick="setIlgi(this)">✅ İlgili</div>
-        <div class="ilgi-chip" data-v="🤔 Kararsız" onclick="setIlgi(this)">🤔 Kararsız</div>
-        <div class="ilgi-chip" data-v="❄️ Soğuk" onclick="setIlgi(this)">❄️ Soğuk</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- B: Soru Akışı -->
-  <div id="asama-soru" style="display:none">
-    <div style="display:flex;align-items:center;margin-bottom:10px">
+  <!-- ── HEADER ── -->
+  <div class="hdr">
+    <div class="hdr-brand">
+      <span class="hdr-badge">RE/MAX</span>
       <div>
-        <span id="soru-tip-lbl" style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;color:var(--navy)"></span>
-        <span id="soru-musteri-lbl" style="font-size:12px;color:var(--ink3);margin-left:5px"></span>
+        <div class="hdr-title">Saha CRM</div>
+        <div class="hdr-sub">Veri Toplama Asistanı</div>
       </div>
     </div>
-    <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-    <div id="soru-listesi"></div>
-
-    <!-- EK SORULAR -->
-    <div class="card" style="margin-top:8px">
-      <div class="card-title">➕ Ek Sorular <span style="font-size:11px;font-weight:400;color:var(--ink3)">(isteğe bağlı)</span></div>
-      <div id="ek-listesi"></div>
-      <button class="btn-add" onclick="ekSoruEkle()">+ Soru Ekle</button>
-    </div>
-
-    <div style="height:12px"></div>
-    <button class="btn btn-green" onclick="showAsama('ozet');ozetOlustur()">📋 Özeti Oluştur</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:#f5c6c6" onclick="showAsama('ozet');ozetOlustur()">🏁 Hızlı Bitir</button>
-  </div>
-
-  <!-- C: Özet -->
-  <div id="asama-ozet" style="display:none">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-      <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px">Toplantı Özeti</span>
-      <span id="ozet-badge" class="tag tag-n"></span>
-    </div>
-
-    <!-- Risk/Fırsat Uyarıları -->
-    <div id="risk-paneli" style="margin-bottom:12px"></div>
-
-    <div class="oz-sec">
-      <h3>📝 Görüşme Notu <span style="font-size:11px;font-weight:400;color:var(--ink3)">(düzenleyebilirsiniz)</span></h3>
-      <textarea id="f-not" rows="14" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Open Sans',sans-serif;font-size:13px;line-height:1.7;resize:vertical"></textarea>
-    </div>
-
-    <div class="g2" style="gap:10px;margin-bottom:10px">
-      <div class="fg"><label>Sonraki Adım</label><input type="text" id="f-adim" placeholder="örn: Tapu kontrolü yapılacak"></div>
-      <div class="fg"><label>Hatırlatıcı</label><input type="datetime-local" id="f-hat"></div>
-    </div>
-
-    <div id="export-onizleme" style="margin-bottom:12px"></div>
-    <button class="btn btn-green" onclick="kaydet()">💾 Kaydet</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-ghost" style="width:100%;margin-top:4px" onclick="goNav('yeni')">← Yeni Toplantı</button>
-  </div>
-</div>
-
-<!-- GEÇMİŞ -->
-<div class="scr" id="sc-gecmis">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px">Geçmiş</span>
-    <span class="tag tag-n" id="gc-count"></span>
-  </div>
-  <!-- Ö7: Arama -->
-  <div class="fg" style="margin-bottom:12px">
-    <input type="text" id="gc-ara" placeholder="🔍 Müşteri adı ile ara…"
-      oninput="renderGecmis()"
-      style="background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;width:100%;font-size:13px;font-family:'Open Sans',sans-serif">
-  </div>
-  <div id="gc-list"></div>
-</div>
-
-<!-- EXPORT -->
-<div class="scr" id="sc-export">
-  <div class="card">
-    <div class="card-title">📤 CRM'e Aktar</div>
-    <p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:14px">
-      Kayıtlar <b>toplanti_asistan_*.json</b> formatında export edilir.<br>
-      CRM → Görüşmeler <b>ve</b> Portföy → <b>JSON Yükle</b> ile aktarılır.
-    </p>
-    <div id="exp-stats" style="margin-bottom:14px"></div>
-    <button class="btn btn-primary" onclick="exportJSON()">⬇️ JSON İndir</button>
-    <div class="div"></div>
-    <button class="btn" style="background:#fff0f0;color:var(--red);border:1.5px solid #f5c6c6" onclick="clearAll()">🗑️ Tüm Verileri Sil</button>
-    <!-- Ö1: Yedekten geri yükleme -->
-    <div id="yedek-bolum" style="margin-top:10px;display:none">
-      <button class="btn btn-ghost" style="width:100%;color:var(--orange);border-color:var(--orange)" onclick="yedekGeriYukle()">↩️ Son Yedeği Geri Yükle</button>
-    </div>
-    <div class="info-box" style="margin-top:14px">
-      <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--navy);margin-bottom:6px">Nasıl çalışır?</div>
-      <ol>
-        <li>Görüşmeleri kaydedin</li>
-        <li>"JSON İndir" ile dosyayı indirin</li>
-        <li>WhatsApp / Drive ile PC'ye gönderin</li>
-        <li>CRM → Görüşmeler → "JSON Yükle"</li>
-        <li>Görüşmeler + Portföyler otomatik eklenir</li>
-      </ol>
-    </div>
-  </div>
-</div>
-
-<!-- SETTINGS -->
-<div class="modal-bg" id="settingsModal">
-  <div class="modal">
-    <h3>⚙️ Ayarlar</h3>
-    <div class="fg"><label>Danışman Adı</label><input type="text" id="s-name" placeholder="Ad Soyad"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" onclick="closeSettings()">İptal</button>
-      <button class="btn btn-primary" style="flex:1" onclick="saveSettings()">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- ═══════════════════════════════════════════════════════════ -->
-<script>
-// ══════════════════════════════════════════════════════════════
-// SORU AĞACI TANIMI
-// Her soru: { id, soru, hint?, tip, kosul?, seçenekler?, riskKural? }
-// tip: 'text' | 'textarea' | 'chip' | 'chip-multi' | 'select' | 'number' | 'date'
-// kosul: { soruId, deger } — bu soru sadece koşul sağlanırsa görünür
-// ══════════════════════════════════════════════════════════════
-
-const SORU_AGACI = {
-
-  // ─── MÜTEAHHİT ─────────────────────────────────────────────
-  Müteahhit: [
-    { id:'m1', soru:'Proje adı ve konumu nedir?', tip:'text' },
-    { id:'m2', soru:'Proje türü nedir?', tip:'chip', secenekler:['Konut','Ticari','Karma','Rezidans','Ofis'] },
-    { id:'m3', soru:'Proje aşaması nedir?', tip:'chip', secenekler:['Ön Satış','İnşaat Devam','Tamamlandı','Anahtar Teslim'] },
-    { id:'m4', soru:'Tahmini teslim tarihi?', tip:'text', hint:'Ay/Yıl olarak belirtin' },
-    { id:'m4b', soru:'İskan (yapı kullanım izni) alındı mı?', tip:'chip', secenekler:['Evet','Hayır','Başvuruldu'],
-      kosul:{ soruId:'m3', degerler:['Tamamlandı','Anahtar Teslim'] },
-      riskKural: (v) => v==='Hayır' ? { tip:'red', mesaj:'İskan alınmamış — tapu devri riskli olabilir.' } : null },
-    { id:'m5', soru:'Ruhsat durumu nedir?', tip:'chip-multi', secenekler:['İnşaat Ruhsatı','Yapı Kullanım İzni','Kat İrtifakı','Kat Mülkiyeti'],
-      riskKural: (v) => !v?.includes('İnşaat Ruhsatı') ? { tip:'yellow', mesaj:'İnşaat ruhsatı teyit edilmeli.' } : null },
-    { id:'m6', soru:'Toplam birim sayısı ve satış oranı?', tip:'text', hint:'örn: 120 birim, %65 satıldı' },
-    { id:'m7', soru:'Ödeme seçenekleri nelerdir?', tip:'chip-multi', secenekler:['Peşin','Banka Kredisi','Senet','Takas','Kira Öder Gibi'] },
-    { id:'m8', soru:'Komisyon oranı ve paylaşım şekli?', tip:'text', hint:'örn: %3, satış ofisi üzerinden' },
-    { id:'m9', soru:'Projenin en büyük rekabet avantajı nedir?', tip:'textarea' },
-    { id:'m10', soru:'Tanıtım materyalleri mevcut mu?', tip:'chip', secenekler:['Evet — teslim edildi','Evet — dijital','Hayır'],
-      riskKural: (v) => v==='Hayır' ? { tip:'blue', mesaj:'Broşür/vaziyet planı talep edilmeli.' } : null },
-    { id:'m11', soru:'Daha önce danışmanlarla çalışma deneyimi var mı?', tip:'chip', secenekler:['Evet — olumlu','Evet — sorun yaşandı','Hayır'],
-      riskKural: (v) => v==='Evet — sorun yaşandı' ? { tip:'yellow', mesaj:'Önceki komisyon sorunları netleştirilmeli.' } : null },
-    { id:'m12', soru:'Ek notlar / özel bilgiler:', tip:'textarea', hint:'Opsiyonel' },
-  ],
-
-  // ─── SATICI ─────────────────────────────────────────────────
-  Satıcı: [
-    { id:'s1', soru:'Mülkün tam adresi nedir?', tip:'text' },
-    { id:'s2', soru:'Mülk türü nedir?', tip:'chip', secenekler:['Daire','Villa','Müstakil','Dükkan','Ofis','Arsa','Tarla','Depo'] },
-    { id:'s3', soru:'İlan türü nedir?', tip:'chip', secenekler:['Satılık','Kiralık'] },
-    { id:'s4', soru:'Alan (m²), oda sayısı ve kat bilgisi?', tip:'text', hint:'örn: 120m², 3+1, 4/8' },
-    { id:'s5', soru:'Bina yaşı kaçtır?', tip:'number',
-      riskKural: (v) => Number(v)>=20 ? { tip:'yellow', mesaj:'Bina yaşı 20+. Deprem yönetmeliği öncesi yapı olabilir.' } : null },
-    { id:'s6', soru:'Cephe ve ısıtma sistemi?', tip:'text', hint:'örn: Güney cephe, kombi' },
-    { id:'s7', soru:'Özellikler nelerdir?', tip:'chip-multi',
-      secenekler:['Asansör','Otopark','Balkon','Güvenlik','Isı Yalıtım','Amerikan Mutfak','Ebeveyn Banyosu','Havuz','Spor Salonu','Deniz Manzarası','Bahçe','Ankastre'] },
-    { id:'s8', soru:'İstenen fiyat ve pazarlık payı nedir?', tip:'text', hint:'örn: ₺3.500.000 / ₺150.000 pazarlık',
-      riskKural: (v) => v?.toLowerCase().includes('pazarlık yok') ? { tip:'blue', mesaj:'Fiyat kesin — müzakere marjı olmayabilir.' } : v ? { tip:'green', mesaj:'Pazarlık payı mevcut — fırsat var.' } : null },
-    { id:'s9', soru:'Tapu durumu nedir?', tip:'chip', secenekler:['Kat Mülkiyeti','Kat İrtifakı','Hisseli Tapu','Arsa Tapusu'],
-      riskKural: (v) => v==='Hisseli Tapu' ? { tip:'red', mesaj:'Hisseli tapu! Diğer hissedarların onayı gerekir.' } : v==='Kat İrtifakı' ? { tip:'yellow', mesaj:'Kat irtifakı — iskan durumu sorgulanmalı.' } : null },
-    { id:'s10', soru:'Üzerinde ipotek veya haciz var mı?', tip:'chip', secenekler:['Hayır','İpotek Var','Haciz Var','İkisi de Var'],
-      riskKural: (v) => v && v!=='Hayır' ? { tip:'red', mesaj:'Tapu yükü mevcut — hukuki kontrol zorunlu.' } : null },
-    { id:'s11', soru:'Kullanım durumu nedir?', tip:'chip', secenekler:['Boş','Mülk Sahibi Kullanıyor','Kiracılı'] },
-    { id:'s11b', soru:'Kira bedeli ve sözleşme bitiş tarihi?', tip:'text',
-      kosul:{ soruId:'s11', degerler:['Kiracılı'] },
-      riskKural: (v) => v ? { tip:'yellow', mesaj:'Kiracı tahliye süreci planlanmalı.' } : null },
-    { id:'s12', soru:'Satış nedeni nedir?', tip:'text', hint:'Yatırım, taşınma, miras, acil nakit vb.' },
-    { id:'s12b', soru:'Ne kadar sürede satmak istiyor?', tip:'chip', secenekler:['Acil (1 ay)','Kısa (1-3 ay)','Orta (3-6 ay)','Esnek'],
-      kosul:{ soruId:'s12', degerler:null },
-      riskKural: (v) => v==='Acil (1 ay)' ? { tip:'green', mesaj:'Acil satış — fiyat müzakeresine açık olabilir.' } : null },
-    { id:'s13', soru:'Portföy kategorisi nedir?', tip:'chip', secenekler:['Yetkili Portföyüm','Paylaşıma Açık','Sahibinden'] },
-    { id:'s14', soru:'Ek notlar / özel bilgiler:', tip:'textarea', hint:'Opsiyonel' },
-  ],
-
-  // ─── ALICI ──────────────────────────────────────────────────
-  Alıcı: [
-    { id:'a1', soru:'Hedef mülk türü nedir?', tip:'chip-multi', secenekler:['Daire','Villa','Müstakil','Arsa','Ticari'] },
-    { id:'a2', soru:'Tercih ettiği bölgeler nelerdir?', tip:'text', hint:'İlçe / mahalle bazında belirtin' },
-    { id:'a3', soru:'Maksimum bütçe nedir?', tip:'text', hint:'örn: ₺4.500.000' },
-    { id:'a4', soru:'Alım amacı nedir?', tip:'chip', secenekler:['Oturum','Yatırım','Yeniden Satış','Kira Geliri'] },
-    { id:'a5', soru:'Finansman yöntemi nedir?', tip:'chip', secenekler:['Nakit','Mortgage / Kredi','Takas','Karma'] },
-    { id:'a5b', soru:'Banka ön onayı alındı mı?', tip:'chip', secenekler:['Evet','Hayır','Süreçte'],
-      kosul:{ soruId:'a5', degerler:['Mortgage / Kredi','Karma'] },
-      riskKural: (v) => v==='Hayır' ? { tip:'yellow', mesaj:'Ön onay yok — finansman riski mevcut.' } : null },
-    { id:'a6', soru:'Oda tercihi ve minimum alan (m²)?', tip:'text', hint:'örn: 3+1, min 100m²' },
-    { id:'a7', soru:'Olmazsa olmaz özellikler nelerdir?', tip:'chip-multi',
-      secenekler:['Asansör','Otopark','Balkon','Güvenlik','Okul Yakını','Metro Yakını','Deniz Manzarası','Bahçe','Yeni Bina'] },
-    { id:'a8', soru:'Hedef satın alma zaman çizelgesi nedir?', tip:'chip', secenekler:['Acil (1 ay)','Kısa (1-3 ay)','Orta (3-6 ay)','Esnek'] },
-    { id:'a9', soru:'Daha önce mülk gezildi mi? Beğenilen / beğenilmeyen neydi?', tip:'textarea' },
-    { id:'a10', soru:'Kararı etkileyen başka kişi var mı?', tip:'chip', secenekler:['Hayır','Eş / Partner','Aile','Ortak Yatırımcı'],
-      riskKural: (v) => v && v!=='Hayır' ? { tip:'blue', mesaj:'Ortak karar vericiler — sunum planlanmalı.' } : null },
-    { id:'a11', soru:'Ek notlar / özel talepler:', tip:'textarea', hint:'Opsiyonel' },
-  ],
-};
-
-
-// ══════════════════════════════════════════════════════════════
-// RİSK KURALLARI — cevap bazlı otomatik uyarılar
-// ══════════════════════════════════════════════════════════════
-function riskKontrol(soruId, cevap) {
-  const sorular = SORU_AGACI[A.tip] || [];
-  const soru = sorular.find(s => s.id === soruId);
-  if (!soru || !soru.riskKural) return null;
-  try { return soru.riskKural(cevap); } catch { return null; }
-}
-
-// ══════════════════════════════════════════════════════════════
-// DURUM
-// ══════════════════════════════════════════════════════════════
-let DB = JSON.parse(localStorage.getItem('ta_db') || '[]');
-let danismanAdi = localStorage.getItem('ta_danisman') || '';
-let A = resetA();
-let ekSayac = 0;
-
-function resetA() {
-  return {
-    tip: null, musteri: '', sirket: '', ilgi: '🔥 Çok Sıcak',
-    tarih: new Date().toISOString(),
-    cevaplar: {},   // { soruId: cevap }
-    daireTipleri: [],
-    ekSorular: [],  // [{soru, cevap}]
-    riskler: []
-  };
-}
-
-// ══════════════════════════════════════════════════════════════
-// INIT / NAV
-// ══════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  showScr('sc-yeni'); showAsama('tip');
-  renderGecmis(); renderExpStats(); gunceleYedekButonu();
-});
-
-function goNav(n) {
-  document.querySelectorAll('.bni').forEach(b => b.classList.remove('on'));
-  document.getElementById('bni-'+n)?.classList.add('on');
-  if (n==='yeni')   { showScr('sc-yeni'); resetYeni(); }
-  if (n==='gecmis') { showScr('sc-gecmis'); renderGecmis(); }
-  if (n==='export') { showScr('sc-export'); renderExpStats(); }
-}
-function showScr(id) { document.querySelectorAll('.scr').forEach(s => s.classList.remove('on')); document.getElementById(id).classList.add('on'); }
-function showAsama(n) { ['tip','soru','ozet'].forEach(x => { document.getElementById('asama-'+x).style.display = x===n?'block':'none'; }); window.scrollTo(0,0); }
-
-// ══════════════════════════════════════════════════════════════
-// AYARLAR
-// ══════════════════════════════════════════════════════════════
-function openSettings() { document.getElementById('s-name').value = danismanAdi; document.getElementById('settingsModal').classList.add('on'); }
-function closeSettings() { document.getElementById('settingsModal').classList.remove('on'); }
-function saveSettings() { danismanAdi = document.getElementById('s-name').value.trim(); localStorage.setItem('ta_danisman', danismanAdi); closeSettings(); toast('✅ Kaydedildi'); }
-
-// ══════════════════════════════════════════════════════════════
-// TİP SEÇİM
-// ══════════════════════════════════════════════════════════════
-function setIlgi(el) { document.querySelectorAll('.ilgi-chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); A.ilgi=el.dataset.v; if(navigator.vibrate)navigator.vibrate(8); }
-
-function secTip(tip, el) {
-  const musteri = document.getElementById('t-musteri').value.trim();
-  if (!musteri) { toast('❌ Müşteri adı girin'); document.getElementById('t-musteri').focus(); return; }
-  A.tip = tip; A.musteri = musteri;
-  A.sirket = document.getElementById('t-sirket').value.trim();
-  A.tarih = new Date().toISOString();
-  A.cevaplar = {}; A.daireTipleri = []; A.ekSorular = []; A.riskler = [];
-  _duzenleIdx = null; // H5 DÜZELTMESİ: yeni toplantıda düzenleme modunu sıfırla
-  document.querySelectorAll('.tip-card').forEach(c=>c.classList.remove('sel'));
-  if(el) el.classList.add('sel');
-  document.getElementById('soru-tip-lbl').textContent = tip;
-  document.getElementById('soru-musteri-lbl').textContent = '— ' + musteri;
-  document.getElementById('ek-listesi').innerHTML = '';
-  const dtSection = document.getElementById('dt-section'); if(dtSection) dtSection.remove();
-  ekSayac = 0;
-  renderSorular();
-  if (tip === 'Müteahhit') { dtEkle(); }
-  showAsama('soru');
-}
-
-// ══════════════════════════════════════════════════════════════
-// SORU RENDER
-// ══════════════════════════════════════════════════════════════
-function kosulSaglaniyorMu(soru) {
-  if (!soru.kosul) return true;
-  const { soruId, degerler } = soru.kosul;
-  const cevap = A.cevaplar[soruId] || '';
-  if (!degerler) return !!cevap; // Sadece dolu olması yeterli
-  return degerler.some(d => cevap === d || (Array.isArray(cevap) && cevap.includes(d)));
-}
-
-function renderSorular() {
-  const sorular = SORU_AGACI[A.tip] || [];
-  const el = document.getElementById('soru-listesi');
-  el.innerHTML = sorular
-    .filter(s => kosulSaglaniyorMu(s))
-    .map((s, i) => soruKartiHTML(s, i, sorular.filter(x=>kosulSaglaniyorMu(x)).length))
-    .join('');
-  updateProg();
-}
-
-function soruKartiHTML(s, i, toplam) {
-  const cevap = A.cevaplar[s.id] || '';
-  const done = Array.isArray(cevap) ? cevap.length > 0 : cevap.trim() !== '';
-  const risk = done ? riskKontrol(s.id, cevap) : null;
-  const isKosul = !!s.kosul;
-  return `<div class="q-card${done?' done':''}${isKosul?' kosul':''}" id="qk-${s.id}">
-    <div class="q-num">
-      Soru ${i+1}/${toplam}
-      ${isKosul ? '<span class="kosul-badge">Koşullu</span>' : ''}
-    </div>
-    <div class="q-text">${s.soru}</div>
-    ${s.hint ? `<div class="q-hint">${s.hint}</div>` : ''}
-    ${renderCevapAlani(s)}
-    ${risk ? riskNoteHTML(risk) : ''}
-    <div id="risk-${s.id}">${risk ? '' : ''}</div>
-  </div>`;
-}
-
-function renderCevapAlani(s) {
-  const cevap = A.cevaplar[s.id] || '';
-  if (s.tip === 'chip' || s.tip === 'chip-multi') {
-    const multi = s.tip === 'chip-multi';
-    const secilenler = Array.isArray(cevap) ? cevap : (cevap ? [cevap] : []);
-    // H1 DÜZELTMESİ: onclick'te metin değil index kullan — özel karakter çakışması yok
-    return `<div class="chip-row">
-      ${s.secenekler.map((o,idx) => `<div class="chip${secilenler.includes(o)?' on':''}"
-        onclick="chipSecIdx('${s.id}',${idx},${multi})">${o}</div>`).join('')}
-    </div>`;
-  }
-  if (s.tip === 'textarea') {
-    // H2 DÜZELTMESİ: onchange → oninput (anlık kayıt)
-    return `<textarea class="q-ans" rows="3" id="inp-${s.id}"
-      oninput="cevapGir('${s.id}',this.value)">${cevap}</textarea>`;
-  }
-  if (s.tip === 'number') {
-    return `<input type="number" class="q-ans" style="min-height:40px;resize:none"
-      id="inp-${s.id}" value="${cevap}"
-      oninput="cevapGir('${s.id}',this.value)" placeholder="Sayı girin">`;
-  }
-  if (s.tip === 'date') {
-    return `<input type="date" class="q-ans" style="min-height:40px;resize:none"
-      id="inp-${s.id}" value="${cevap}"
-      onchange="cevapGir('${s.id}',this.value)">`;
-  }
-  return `<input type="text" class="q-ans" style="min-height:40px;resize:none"
-    id="inp-${s.id}" value="${cevap}"
-    oninput="cevapGir('${s.id}',this.value)" placeholder="Yanıtı girin…">`;
-}
-
-function riskNoteHTML(risk) {
-  if (!risk) return '';
-  const sMap = { red:'risk-red', yellow:'risk-yellow', green:'risk-green', blue:'risk-blue' };
-  const iMap = { red:'⚠️', yellow:'🟡', green:'✅', blue:'ℹ️' };
-  return `<div class="risk-note ${sMap[risk.tip]||'risk-blue'}"><span>${iMap[risk.tip]||'ℹ️'}</span><span>${risk.mesaj}</span></div>`;
-}
-
-// ══════════════════════════════════════════════════════════════
-// CEVAP GİRİŞİ
-// ══════════════════════════════════════════════════════════════
-
-// H1 DÜZELTMESİ: Index bazlı chip seçimi — özel karakter sorununu çözer
-function chipSecIdx(soruId, idx, multi) {
-  if (navigator.vibrate) navigator.vibrate(8);
-  const sorular = SORU_AGACI[A.tip] || [];
-  const soru = sorular.find(s => s.id === soruId);
-  if (!soru || !soru.secenekler) return;
-  const deger = soru.secenekler[idx];
-  if (deger === undefined) return;
-  if (multi) {
-    let mevcut = Array.isArray(A.cevaplar[soruId]) ? [...A.cevaplar[soruId]] : [];
-    if (mevcut.includes(deger)) mevcut = mevcut.filter(x => x !== deger);
-    else mevcut.push(deger);
-    A.cevaplar[soruId] = mevcut;
-  } else {
-    A.cevaplar[soruId] = A.cevaplar[soruId] === deger ? '' : deger;
-  }
-  renderSorular();
-}
-
-// Eski chipSec — geriye dönük uyumluluk
-function chipSec(soruId, deger, multi) {
-  if (navigator.vibrate) navigator.vibrate(8);
-  if (multi) {
-    let mevcut = Array.isArray(A.cevaplar[soruId]) ? [...A.cevaplar[soruId]] : [];
-    if (mevcut.includes(deger)) mevcut = mevcut.filter(x=>x!==deger);
-    else mevcut.push(deger);
-    A.cevaplar[soruId] = mevcut;
-  } else {
-    A.cevaplar[soruId] = A.cevaplar[soruId] === deger ? '' : deger;
-  }
-  renderSorular();
-}
-
-function cevapGir(soruId, deger) {
-  A.cevaplar[soruId] = deger;
-  // Koşullu soruları kontrol et — gereksiz yeniden render olmadan
-  const sorular = SORU_AGACI[A.tip] || [];
-  const kosullular = sorular.filter(s => s.kosul?.soruId === soruId);
-  if (kosullular.length) renderSorular();
-  else {
-    // Sadece risk notunu güncelle
-    const risk = riskKontrol(soruId, deger);
-    const kart = document.getElementById('qk-'+soruId);
-    if (kart) {
-      kart.classList.toggle('done', !!deger?.trim?.() || (Array.isArray(deger) && deger.length>0));
-      const riskEl = document.getElementById('risk-'+soruId);
-      if (riskEl) riskEl.innerHTML = risk ? riskNoteHTML(risk) : '';
-    }
-    updateProg();
-  }
-}
-
-function updateProg() {
-  const sorular = (SORU_AGACI[A.tip] || []).filter(s => kosulSaglaniyorMu(s));
-  const dolu = sorular.filter(s => {
-    const c = A.cevaplar[s.id];
-    return Array.isArray(c) ? c.length>0 : c?.trim?.();
-  }).length;
-  const pct = sorular.length ? Math.round(dolu/sorular.length*100) : 0;
-  document.getElementById('prog').style.width = pct+'%';
-}
-
-// ══════════════════════════════════════════════════════════════
-// DAİRE TİPLERİ (Müteahhit)
-// ══════════════════════════════════════════════════════════════
-function dtEkle() {
-  const id = 'dt'+Date.now();
-  const div = document.createElement('div');
-  div.className='dt-row'; div.id=id;
-  div.innerHTML=`<button class="dt-del" onclick="dtSil('${id}')">✕</button>
-    <div class="dt-grid">
-      <div><div class="dt-lbl">Tip</div>
-        <select class="dt-inp" id="${id}-tip">
-          <option>Stüdyo</option><option>1+1</option><option>2+1</option><option selected>3+1</option>
-          <option>3+2</option><option>4+1</option><option>4+2</option><option>5+1</option><option>Dubleks</option><option>Penthouse</option>
-        </select></div>
-      <div><div class="dt-lbl">Adet</div><input class="dt-inp" type="number" id="${id}-adet" placeholder="10"></div>
-      <div><div class="dt-lbl">Alan m²</div><input class="dt-inp" type="text" id="${id}-alan" placeholder="95-120"></div>
-      <div><div class="dt-lbl">Kat</div><input class="dt-inp" type="text" id="${id}-kat" placeholder="2-8"></div>
-      <div><div class="dt-lbl">Cephe</div><input class="dt-inp" type="text" id="${id}-cephe" placeholder="G/K"></div>
-    </div>
-    <div class="dt-grid2">
-      <div><div class="dt-lbl">Fiyat (₺)</div><input class="dt-inp" type="number" id="${id}-fiyat" placeholder="2500000"></div>
-      <div><div class="dt-lbl">Pazarlık (₺)</div><input class="dt-inp" type="number" id="${id}-pazarlik" placeholder="100000"></div>
-      <div><div class="dt-lbl">Kalan</div><input class="dt-inp" type="number" id="${id}-kalan" placeholder="5"></div>
-    </div>`;
-  // Müteahhit sorularının sonuna, ek sorular bölümünden önce ekle
-  const soruListesi = document.getElementById('soru-listesi');
-  if (soruListesi) {
-    let dtSection = document.getElementById('dt-section');
-    if (!dtSection) {
-      dtSection = document.createElement('div');
-      dtSection.id = 'dt-section';
-      dtSection.innerHTML = '<div class="card"><div class="card-title">🏢 Daire Tipleri <button class="btn-ghost btn-sm" onclick="dtEkle()" style="float:right">+ Tip Ekle</button></div><div id="dt-listesi"></div></div>';
-      soruListesi.after(dtSection);
-    }
-    document.getElementById('dt-listesi').appendChild(div);
-  }
-}
-function dtSil(id) { const el=document.getElementById(id); if(el) el.remove(); }
-function dtVerisiniTopla() {
-  return Array.from(document.querySelectorAll('.dt-row')).map(s => ({
-    tip: document.getElementById(s.id+'-tip')?.value||'',
-    adet: document.getElementById(s.id+'-adet')?.value||'',
-    alan: document.getElementById(s.id+'-alan')?.value||'',
-    kat: document.getElementById(s.id+'-kat')?.value||'',
-    cephe: document.getElementById(s.id+'-cephe')?.value||'',
-    fiyat: document.getElementById(s.id+'-fiyat')?.value||'',
-    pazarlik: document.getElementById(s.id+'-pazarlik')?.value||'',
-    kalan: document.getElementById(s.id+'-kalan')?.value||''
-  })).filter(r => r.tip && (r.fiyat||r.alan));
-}
-
-// ══════════════════════════════════════════════════════════════
-// EK SORULAR
-// ══════════════════════════════════════════════════════════════
-function ekSoruEkle() {
-  const id = 'ek'+ekSayac++;
-  const div = document.createElement('div');
-  div.className='ek-row'; div.id=id;
-  div.innerHTML=`<button class="ek-del" onclick="ekSoruSil('${id}')">✕</button>
-    <div class="ek-grid">
-      <div class="fg" style="margin-bottom:0"><label>Soru</label><input type="text" id="${id}-soru" placeholder="Soruyu yazın…"></div>
-      <div class="fg" style="margin-bottom:0"><label>Cevap</label><textarea id="${id}-cevap" rows="2" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:'Open Sans',sans-serif;font-size:13px;resize:none" placeholder="Cevabı yazın…"></textarea></div>
-    </div>`;
-  document.getElementById('ek-listesi').appendChild(div);
-}
-function ekSoruSil(id) { const el=document.getElementById(id); if(el) el.remove(); }
-function ekVerisiniTopla() {
-  return Array.from(document.querySelectorAll('.ek-row')).map(r => ({
-    soru: document.getElementById(r.id+'-soru')?.value.trim()||'',
-    cevap: document.getElementById(r.id+'-cevap')?.value.trim()||''
-  })).filter(r => r.soru||r.cevap);
-}
-
-// ══════════════════════════════════════════════════════════════
-// ÖZET OLUŞTUR
-// ══════════════════════════════════════════════════════════════
-function ozetOlustur() {
-  A.daireTipleri = dtVerisiniTopla();
-  A.ekSorular = ekVerisiniTopla();
-
-  document.getElementById('ozet-badge').textContent = A.tip+' — '+A.musteri;
-
-  // Risk paneli
-  const riskler = [];
-  const sorular = SORU_AGACI[A.tip] || [];
-  sorular.forEach(s => {
-    if (!kosulSaglaniyorMu(s)) return;
-    const c = A.cevaplar[s.id];
-    const risk = riskKontrol(s.id, c);
-    if (risk) riskler.push(risk);
-  });
-  A.riskler = riskler;
-
-  const riskEl = document.getElementById('risk-paneli');
-  if (riskler.length) {
-    riskEl.innerHTML = riskler.map(r => `<div class="risk-note ${
-      {red:'risk-red',yellow:'risk-yellow',green:'risk-green',blue:'risk-blue'}[r.tip]||'risk-blue'
-    }"><span>${{red:'⚠️',yellow:'🟡',green:'✅',blue:'ℹ️'}[r.tip]||'ℹ️'}</span><span>${r.mesaj}</span></div>`).join('');
-  } else {
-    riskEl.innerHTML = '';
-  }
-
-  // Not şablonu oluştur
-  document.getElementById('f-not').value = notSablonuOlustur();
-
-  // Export önizleme
-  renderExportOnizleme();
-}
-
-function notSablonuOlustur() {
-  const tarih = new Date(A.tarih).toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  const sorular = (SORU_AGACI[A.tip]||[]).filter(s => kosulSaglaniyorMu(s));
-  const satırlar = [];
-
-  satırlar.push(`${'═'.repeat(50)}`);
-  satırlar.push(`${A.tip.toUpperCase()} GÖRÜŞME NOTU`);
-  satırlar.push(`${'═'.repeat(50)}`);
-  satırlar.push(`Tarih    : ${tarih}`);
-  satırlar.push(`Müşteri  : ${A.musteri}${A.sirket?' ('+A.sirket+')':''}`);
-  satırlar.push(`İlgi     : ${A.ilgi}`);
-  if (danismanAdi) satırlar.push(`Danışman : ${danismanAdi}`);
-  satırlar.push('');
-
-  // Daire tipleri (Müteahhit)
-  if (A.tip==='Müteahhit' && A.daireTipleri.length) {
-    satırlar.push('── DAİRE TİPLERİ ──────────────────────────');
-    A.daireTipleri.forEach(d => {
-      satırlar.push(`${d.tip.padEnd(12)} | ${d.adet} adet | ${d.alan}m² | Kat: ${d.kat} | Cephe: ${d.cephe}`);
-      satırlar.push(`  Fiyat: ₺${Number(d.fiyat||0).toLocaleString('tr-TR')} | Pazarlık: ₺${Number(d.pazarlik||0).toLocaleString('tr-TR')} | Kalan: ${d.kalan}`);
-    });
-    satırlar.push('');
-  }
-
-  // Soru-cevaplar
-  satırlar.push('── SORU — CEVAPLAR ─────────────────────────');
-  sorular.forEach((s, i) => {
-    const c = A.cevaplar[s.id];
-    if (!c || (Array.isArray(c)&&!c.length)) return;
-    const cStr = Array.isArray(c) ? c.join(', ') : c;
-    satırlar.push(`S${i+1}. ${s.soru}`);
-    satırlar.push(`   → ${cStr}`);
-  });
-
-  // Risk/fırsat uyarıları
-  if (A.riskler.length) {
-    satırlar.push('');
-    satırlar.push('── UYARILAR ────────────────────────────────');
-    A.riskler.forEach(r => {
-      const ikon = {red:'⚠️ RİSK',yellow:'🟡 DİKKAT',green:'✅ FIRSAT',blue:'ℹ️ BİLGİ'}[r.tip]||'ℹ️';
-      satırlar.push(`${ikon}: ${r.mesaj}`);
-    });
-  }
-
-  // Ek sorular
-  if (A.ekSorular.length) {
-    satırlar.push('');
-    satırlar.push('── EK NOTLAR ───────────────────────────────');
-    A.ekSorular.forEach((e,i) => {
-      if (e.soru) satırlar.push(`E${i+1}. ${e.soru}`);
-      if (e.cevap) satırlar.push(`   → ${e.cevap}`);
-    });
-  }
-
-  satırlar.push('');
-  satırlar.push(`${'─'.repeat(50)}`);
-
-  return satırlar.join('\n');
-}
-
-function renderExportOnizleme() {
-  const el = document.getElementById('export-onizleme');
-  if (!el) return;
-  const items = [];
-  items.push({ic:'💬',lbl:'Görüşme Kaydı',sub:`${A.tip} — ${A.musteri}`});
-  if ((A.tip==='Müteahhit'||A.tip==='Satıcı') && (A.daireTipleri.length || A.cevaplar['s1'])) {
-    const cnt = A.tip==='Müteahhit' ? A.daireTipleri.length : 1;
-    items.push({ic:'🏢',lbl:`${cnt} Portföy Kaydı`,sub:A.tip==='Müteahhit'?'Daire tipleri':A.cevaplar['s1']||''});
-  }
-  el.innerHTML = `<div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">CRM'e Aktarılacaklar</div>`+
-    items.map(it=>`<div style="background:var(--surface);border-radius:10px;box-shadow:var(--sh);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">${it.ic}</span><div><div style="font-weight:600;font-size:13px">${it.lbl}</div><div style="font-size:11px;color:var(--ink3)">${it.sub}</div></div></div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════════
-// KAYDET
-// ══════════════════════════════════════════════════════════════
-var _duzenleIdx = null; // null = yeni kayıt, sayı = DB indeksi
-
-function kaydet() {
-  if (!A.musteri) { toast('❌ Müşteri adı eksik'); return; }
-  const not  = document.getElementById('f-not').value.trim();
-  const adim = document.getElementById('f-adim').value.trim();
-  const hat  = document.getElementById('f-hat').value;
-
-  const gorusme = {
-    _id: _duzenleIdx !== null ? (DB[_duzenleIdx]?.gorusme?._id || 'ta_g_'+Date.now()) : 'ta_g_'+Date.now(),
-    _zaman: new Date().toISOString(), tip_veri:'gorusme',
-    musteri:A.musteri, musteriId:null, tarih:A.tarih,
-    tip:'Yüz Yüze', ilgi:A.ilgi,
-    mulk: A.tip==='Müteahhit' ? (A.cevaplar['m1']||A.sirket||'') : (A.cevaplar['s1']||''),
-    not, adim, hat,
-    _tip_kisi:A.tip, _sirket:A.sirket
-  };
-
-  const portfoyler = [];
-  if (A.tip==='Müteahhit' && A.daireTipleri.length) {
-    A.daireTipleri.forEach(dt => {
-      portfoyler.push({
-        _id:'ta_p_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
-        _zaman:new Date().toISOString(), tip_veri:'portfoy',
-        ad:`${A.cevaplar['m1']||A.sirket||'Proje'} — ${dt.tip}`,
-        bolge:A.cevaplar['m1']||'', tip:'Satılık', kategori:'paylasim',
-        fiyat:dt.fiyat||'', alan:dt.alan||'', oda:dt.tip, kat:dt.kat||'', cephe:dt.cephe||'',
-        ozellikler:Array.isArray(A.cevaplar['m5'])?A.cevaplar['m5'].join(', '):(A.cevaplar['m5']||''),
-        durum:'Aktif',
-        acik:`${A.cevaplar['m3']||''} | Adet: ${dt.adet} | Kalan: ${dt.kalan} | Pazarlık: ₺${dt.pazarlik||0} | Ödeme: ${Array.isArray(A.cevaplar['m7'])?A.cevaplar['m7'].join(', '):(A.cevaplar['m7']||'')}`,
-        musteri:A.musteri, tarih:A.tarih
-      });
-    });
-  }
-  if (A.tip==='Satıcı' && A.cevaplar['s1']) {
-    portfoyler.push({
-      _id:'ta_p_'+Date.now(), _zaman:new Date().toISOString(), tip_veri:'portfoy',
-      ad:`${A.cevaplar['s2']||'Mülk'} — ${A.cevaplar['s1']}`,
-      bolge:A.cevaplar['s1']||'', tip:A.cevaplar['s3']||'Satılık',
-      kategori:A.cevaplar['s13']==='Yetkili Portföyüm'?'yetkili':'paylasim',
-      fiyat:(A.cevaplar['s8']||'').replace(/[^0-9]/g,'')||'',
-      alan:(A.cevaplar['s4']||'').replace(/[^0-9]/g,'')||'',
-      oda:A.cevaplar['s4']||'', kat:'',
-      ozellikler:Array.isArray(A.cevaplar['s7'])?A.cevaplar['s7'].join(', '):(A.cevaplar['s7']||''),
-      tapu:A.cevaplar['s9']||'', durum:'Aktif',
-      acik:`${A.cevaplar['s1']||''}\nSatış nedeni: ${A.cevaplar['s12']||''}\n${A.cevaplar['s14']||''}`,
-      musteri:A.musteri, tarih:A.tarih
-    });
-  }
-
-  // Düzenleme snapshot — bir sonraki düzenlemede geri yüklemek için
-  const snapshot = {
-    tip:A.tip, musteri:A.musteri, sirket:A.sirket, ilgi:A.ilgi, tarih:A.tarih,
-    cevaplar:JSON.parse(JSON.stringify(A.cevaplar)),
-    daireTipleri:JSON.parse(JSON.stringify(A.daireTipleri)),
-    ekSorular:JSON.parse(JSON.stringify(A.ekSorular))
-  };
-
-  const kayit = { gorusme, portfoyler, id:'k'+Date.now(), _snapshot:snapshot };
-
-  if (_duzenleIdx !== null) {
-    // Mevcut kaydı güncelle — id'yi koru
-    kayit.id = DB[_duzenleIdx].id || kayit.id;
-    DB[_duzenleIdx] = kayit;
-    _duzenleIdx = null;
-    toast('✅ Kayıt güncellendi!');
-  } else {
-    DB.push(kayit);
-    toast('✅ Kaydedildi!');
-  }
-
-  guvenliKaydet(DB);
-  if (navigator.vibrate) navigator.vibrate([30,50,30]);
-  setTimeout(() => goNav('gecmis'), 600);
-}
-
-// ══════════════════════════════════════════════════════════════
-// GEÇMİŞ
-// ══════════════════════════════════════════════════════════════
-
-// Global silme haritası — render sırasında doldurulur
-var _silMap = {};
-
-function renderGecmis() {
-  const el  = document.getElementById('gc-list');
-  const cnt = document.getElementById('gc-count');
-  _silMap   = {};
-
-  // Ö7: Arama filtresi
-  const aramaEl    = document.getElementById('gc-ara');
-  const aramaMetni = (aramaEl?.value || '').toLowerCase().trim();
-
-  const sorted = [...DB]
-    .map((k, origIdx) => ({ k, origIdx }))
-    .filter(({ k }) => {
-      if (!aramaMetni) return true;
-      const g = k.gorusme || k;
-      return (g.musteri||'').toLowerCase().includes(aramaMetni) ||
-             (g._tip_kisi||'').toLowerCase().includes(aramaMetni) ||
-             (g.not||'').toLowerCase().includes(aramaMetni);
-    })
-    .sort((a, b) => new Date(b.k.gorusme?.tarih || 0) - new Date(a.k.gorusme?.tarih || 0));
-
-  cnt.textContent = sorted.length + (aramaMetni ? ` sonuç` : ' kayıt');
-
-  if (!sorted.length) {
-    el.innerHTML = '<div class="empty"><div style="font-size:40px;margin-bottom:8px">📋</div><div style="font-weight:600;margin-bottom:4px">Henüz görüşme yok</div><div style="font-size:12px">Yeni toplantı başlatın</div></div>';
-    return;
-  }
-
-  el.innerHTML = sorted.map(({ k, origIdx }, i) => {
-    _silMap[i] = origIdx; // görüntü indeksi → DB indeksi
-    const g       = k.gorusme || k;
-    const tarih   = new Date(g.tarih || g._zaman).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric' });
-    const ilgiCls = g.ilgi?.includes('Sıcak') ? 'tag-o' : g.ilgi?.includes('İlgili') ? 'tag-g' : 'tag-n';
-    const portCnt = k.portfoyler?.length || 0;
-
-    return `<div class="hist-item" onclick="toggleHist(${i})">
-      <div class="hi-row">
-        <div class="hi-name">${g.musteri || '—'}</div>
-        <div class="hi-date">${tarih}</div>
+    <div class="hdr-right">
+      <div class="hdr-btn" onclick="showExport()" title="Dışa aktar">
+        📤<span class="bcnt" id="rec-badge" style="display:none">0</span>
       </div>
-      <div class="hi-tags">
-        <span class="tag tag-n">${g._tip_kisi || 'Görüşme'}</span>
-        ${g.ilgi ? `<span class="tag ${ilgiCls}">${g.ilgi}</span>` : ''}
-        ${portCnt ? `<span class="tag" style="background:var(--gold-p);color:var(--gold)">🏢 ${portCnt} Portföy</span>` : ''}
+    </div>
+  </div>
+
+  <!-- ════ HOME ════ -->
+  <div class="screen active" id="s-home">
+    <div class="home-greeting">
+      <div class="home-date-lbl" id="home-date"></div>
+      <h2>Merhaba 👋</h2>
+      <p>Hangi veriyi kaydetmek istiyorsunuz?</p>
+    </div>
+
+    <div class="sgrid">
+      <div class="sc" onclick="goTo('esnaf')">
+        <div class="sc-stripe" style="background:var(--navy)"></div>
+        <span class="sc-ic">🏪</span>
+        <h3>Esnaf Görüşmesi</h3>
+        <p>Piyasa & işletme notu</p>
       </div>
-      <div id="hd-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        ${g.not
-          ? `<div id="not-view-${i}" style="font-size:12px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:10px;margin-bottom:8px;max-height:200px;overflow-y:auto">${g.not}</div>
-             <textarea id="not-edit-${i}" style="display:none;width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Open Sans',sans-serif;font-size:12px;line-height:1.6;resize:vertical;min-height:160px;margin-bottom:8px">${g.not}</textarea>`
-          : ''}
-        ${g.adim ? `<div style="font-size:12px;color:var(--navy);font-weight:600;margin-bottom:8px">→ ${g.adim}</div>` : ''}
-        <div id="aksiyonlar-${i}" style="display:flex;gap:6px;flex-wrap:wrap" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-sm" style="color:var(--navy);border-color:var(--navy)"
-            onclick="event.stopPropagation();kaydıDuzenle(${i})">✏️ Düzenle</button>
-          ${g.not
-            ? `<button class="btn btn-ghost btn-sm" id="duzenle-btn-${i}" onclick="notDuzenle(${i},${origIdx})">📝 Notu Düzenle</button>
-               <button class="btn btn-ghost btn-sm" id="kaydet-btn-${i}" style="display:none;color:var(--green);border-color:var(--green)" onclick="notKaydet(${i},${origIdx})">✓ Kaydet</button>
-               <button class="btn btn-ghost btn-sm" id="iptal-btn-${i}" style="display:none" onclick="notIptal(${i})">İptal</button>`
-            : ''}
-          <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:#f5c6c6"
-            onclick="event.stopPropagation();silOnayGoster(${i})">🗑️ Sil</button>
-        </div>
-        <div id="sil-onay-${i}" style="display:none;margin-top:8px;padding:10px 12px;background:#fff0f0;border:1px solid #f5c6c6;border-radius:8px">
-          <div style="font-size:13px;color:var(--red);margin-bottom:8px;font-weight:600">Bu görüşme silinecek. Emin misiniz?</div>
-          <div style="display:flex;gap:8px">
-            <button style="flex:1;background:var(--red);color:#fff;border:none;border-radius:7px;padding:9px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;cursor:pointer"
-              onclick="event.stopPropagation();silYap(${i})">Evet, Sil</button>
-            <button style="flex:1;background:var(--surface);color:var(--ink2);border:1.5px solid var(--border);border-radius:7px;padding:9px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:13px;cursor:pointer"
-              onclick="event.stopPropagation();silOnayKapat(${i})">İptal</button>
+      <div class="sc" onclick="goTo('musteri')">
+        <div class="sc-stripe" style="background:var(--red)"></div>
+        <span class="sc-ic">👤</span>
+        <h3>Kişi / Müşteri</h3>
+        <p>CRM kişi kaydı</p>
+      </div>
+      <div class="sc" onclick="goTo('portfoy')">
+        <div class="sc-stripe" style="background:var(--green)"></div>
+        <span class="sc-ic">🏠</span>
+        <h3>Portföy İlanı</h3>
+        <p>Satılık & kiralık mülk</p>
+      </div>
+      <div class="sc" onclick="goTo('mahalle')">
+        <div class="sc-stripe" style="background:var(--orange)"></div>
+        <span class="sc-ic">🗺</span>
+        <h3>Mahalle Notu</h3>
+        <p>Bölge & sokak analizi</p>
+      </div>
+    </div>
+
+    <div class="sc-wide" onclick="goTo('gorusme')">
+      <div class="sc-stripe" style="background:#1a5fa0;height:100%;width:3px;border-radius:3px 0 0 3px;position:absolute;left:0;top:0;"></div>
+      <span class="sc-wide-ic">📞</span>
+      <div style="flex:1;min-width:0"><h3>Görüşme Notu</h3><p>Mevcut müşteriyle görüşme kaydet</p></div>
+      <span class="sc-wide-arr">›</span>
+    </div>
+
+    <div class="sec-head">
+      <h4>Son Kayıtlar</h4>
+      <span id="rec-count-lbl">0 kayıt</span>
+    </div>
+    <div class="rlist" id="home-records">
+      <div class="empty">Henüz kayıt yok</div>
+    </div>
+
+    <div class="exp-bar">
+      <button class="exp-btn" onclick="showExport()">
+        <span>📤</span>
+        <span>JSON Dışa Aktar — CRM Import</span>
+        <span class="exp-cnt" id="exp-cnt-lbl">0</span>
+      </button>
+    </div>
+    <div style="padding:0 16px 8px">
+      <button onclick="showOzet()" style="width:100%;padding:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">
+        📊 Gezi Özeti
+      </button>
+    </div>
+    <button id="install-btn" onclick="pwaInstall()">📲 Ana Ekrana Ekle</button>
+    <div class="bpad"></div>
+  </div>
+
+  <!-- ════ ESNAF ════ -->
+  <div class="screen" id="s-esnaf">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Esnaf Görüşmesi</h2><p>Piyasa bilgisi ve işletme notu</p></div>
+      <span class="fpill" style="background:var(--navy-pale);color:var(--navy);">Etki Çevresi</span>
+    </div>
+    <div class="fbody">
+      <div class="info-box">ℹ️ Esnaf kaydı CRM'e <strong>Esnaf</strong> tipinde Kişi olarak aktarılır.</div>
+
+      <!-- İŞLETME BİLGİLERİ -->
+      <div class="fsec">
+        <div class="fsec-label">İşletme Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>İşletme Adı *</label><input type="text" id="e-isletme" placeholder="Şirket veya dükkan adı" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Yetkili Kişi</label><input type="text" id="e-yetkili" placeholder="Ad Soyad" autocomplete="off"></div>
+            <div class="fg"><label>Telefon</label><input type="tel" id="e-tel" placeholder="05__"></div>
+          </div>
+          <div class="fg"><label>İş Tipi</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'e-istip')">Market / Bakkal</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Restoran / Kafe</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Tekstil / Butik</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Berber / Kuaför</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Eczane</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Kırtasiye</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Elektronik</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Yapı Malzeme</div>
+              <div class="chip" onclick="togChip(this,'e-istip')">Diğer</div>
+            </div>
+            <input type="hidden" id="e-istip">
+          </div>
+          <div class="fg"><label>Kaç yıldır bu işyerinde?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-sure')">1 yıldan az</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">1–3 yıl</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">3–10 yıl</div>
+              <div class="chip" onclick="selChip(this,'e-sure')">10+ yıl</div>
+            </div>
+            <input type="hidden" id="e-sure">
           </div>
         </div>
       </div>
+
+      <!-- MÜLKİYET & KİRA -->
+      <div class="fsec">
+        <div class="fsec-label">Mülkiyet & Kira</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>İşletme Mülkiyet Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Kendi Mülkü</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Kiracı</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Devir</div>
+              <div class="chip" onclick="selChip(this,'e-kira-durum');esnafKiraToggle(this.textContent)">Bilinmiyor</div>
+            </div>
+            <input type="hidden" id="e-kira-durum">
+          </div>
+          <div id="e-kira-detay" style="display:none;flex-direction:column;gap:10px;">
+            <div class="fg"><label>Tahmini Kira (₺/ay)</label><input type="number" id="e-kira-bedel" placeholder="örn: 25000" inputmode="numeric"></div>
+            <div class="fg"><label>Kira Artış Beklentisi</label>
+              <div class="chips">
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Artacak</div>
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Sabit</div>
+                <div class="chip" onclick="selChip(this,'e-kira-artis')">Belirsiz</div>
+              </div>
+              <input type="hidden" id="e-kira-artis">
+            </div>
+          </div>
+          <div id="e-devir-detay" style="display:none;">
+            <div class="fg"><label>Devir Bedeli (₺)</label><input type="number" id="e-devir-bedel" placeholder="Tahmini devir bedeli" inputmode="numeric"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PİYASA BİLGİSİ -->
+      <div class="fsec">
+        <div class="fsec-label">Piyasa Gözlemi</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Bölge Hareketliliği</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Çok Hareketli</div>
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Normal</div>
+              <div class="chip" onclick="selChip(this,'e-hareketlilik')">Durgun</div>
+            </div>
+            <input type="hidden" id="e-hareketlilik">
+          </div>
+          <div class="fg"><label>Son 1 yılda bölgede mülk el değiştirdi mi?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Evet — Hareketli</div>
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Kısmen</div>
+              <div class="chip" onclick="selChip(this,'e-eldegistirme')">Hayır — Durgun</div>
+            </div>
+            <input type="hidden" id="e-eldegistirme">
+          </div>
+          <div class="fg"><label>Boş dükkan / işyeri var mı?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Birkaç Tane</div>
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Çok Var</div>
+              <div class="chip" onclick="selChip(this,'e-bos-dukkan')">Yok</div>
+            </div>
+            <input type="hidden" id="e-bos-dukkan">
+          </div>
+          <div class="fg"><label>Bölge Piyasası Yorumu</label>
+            <textarea id="e-piyasa" rows="3" placeholder="Kira fiyatları, müşteri yoğunluğu, yeni yapılaşma..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- REFERANS POTANSİYELİ -->
+      <div class="fsec">
+        <div class="fsec-label">Referans & Fırsat</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Potansiyel referans verebilir mi?</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-referans')">Evet</div>
+              <div class="chip" onclick="selChip(this,'e-referans')">Belki</div>
+              <div class="chip" onclick="selChip(this,'e-referans')">Hayır</div>
+            </div>
+            <input type="hidden" id="e-referans">
+          </div>
+          <div class="fg"><label>İletişim Tercihi</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'e-iletisim')">Telefon</div>
+              <div class="chip" onclick="selChip(this,'e-iletisim')">WhatsApp</div>
+              <div class="chip" onclick="selChip(this,'e-iletisim')">Yüz Yüze</div>
+            </div>
+            <input type="hidden" id="e-iletisim">
+          </div>
+          <div class="fg"><label>Notlarım</label>
+            <textarea id="e-not" rows="3" placeholder="Kişisel gözlem, takip notu, fırsat, dikkat edilecek..."></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="savebar"><button class="savebtn btn-navy" onclick="save_('esnaf')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ MÜŞTERİ ════ -->
+  <div class="screen" id="s-musteri">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Kişi / Müşteri</h2><p>CRM ile birebir uyumlu</p></div>
+      <span class="fpill" style="background:var(--red-pale);color:var(--red);">Kişi</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Temel Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Ad Soyad *</label><input type="text" id="m-ad" placeholder="Ad Soyad" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Telefon</label><input type="tel" id="m-tel" placeholder="05__"></div>
+            <div class="fg"><label>E-posta</label><input type="email" id="m-email" placeholder="mail@örnek.com"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Meslek</label><input type="text" id="m-meslek" placeholder="Meslek / Sektör" autocomplete="off"></div>
+            <div class="fg"><label>Sosyal Medya</label><input type="text" id="m-sosyal" placeholder="@instagram" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">CRM Sınıflandırması</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Pipeline</label>
+            <select id="m-pipe">
+              <option>Potansiyel</option><option>İlk Görüşme</option><option>Aktif Arama</option>
+              <option>Değerleme Yapıldı</option><option>Yetki Alındı</option>
+              <option>Teklif Verildi</option><option>Kapandı</option>
+            </select>
+          </div>
+          <div class="fg"><label>Kişi Tipi *</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Alıcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Satıcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Kiracı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Mülk Sahibi</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Yatırımcı</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Kurumsal</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Müteahhit</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Danışman</div>
+              <div class="chip" onclick="selChip(this,'m-tip');updMTip()">Etki Çevresi</div>
+            </div>
+            <input type="hidden" id="m-tip">
+          </div>
+          <div id="m-ek"></div>
+          <div class="fg"><label>Etiket</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'m-etiket')">🔥 Sıcak</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">⭐ VIP</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">⏳ Bekliyor</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">❄️ Soğuk</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">🚨 Acil</div>
+              <div class="chip" onclick="selChip(this,'m-etiket')">👥 Referans</div>
+            </div>
+            <input type="hidden" id="m-etiket">
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Kaynak & Notlar</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Tercih İletişim</label>
+            <select id="m-ilet">
+              <option value="">—</option>
+              <option>Telefon</option><option>WhatsApp</option><option>E-posta</option><option>Yüz Yüze</option>
+            </select>
+          </div>
+          <div class="fg"><label>Referans Kaynağı</label>
+            <select id="m-ref">
+              <option value="">—</option>
+              <optgroup label="Dijital">
+                <option>Instagram</option><option>Facebook</option><option>LinkedIn</option>
+                <option>Sahibinden</option><option>Hepsiemlak</option><option>Emlakjet</option><option>RE/MAX Sitesi</option>
+              </optgroup>
+              <optgroup label="Saha / Doğrudan">
+                <option>FSBO - Kapı Çalma</option><option>FSBO - Sahibinden İlanı</option>
+                <option>FSBO - Sosyal Medya İlanı</option><option>FSBO - Pano/Tabela</option>
+                <option>Soğuk Arama</option><option>Ofis Walk-in</option>
+              </optgroup>
+              <optgroup label="Referans / Çevre">
+                <option>Referans Müşteri</option><option>Etki Çevresi</option><option>Eski Müşteri</option>
+              </optgroup>
+              <optgroup label="Diğer"><option>Diğer</option></optgroup>
+            </select>
+          </div>
+          <div class="fg"><label>Genel Notlar</label>
+            <textarea id="m-not" placeholder="Özel durum, kişisel notlar..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-red" onclick="save_('musteri')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ PORTFÖY ════ -->
+  <div class="screen" id="s-portfoy">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Portföy İlanı</h2><p>Mülk kaydı</p></div>
+      <span class="fpill" style="background:var(--green-pale);color:var(--green);">Portföy</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Mülk Adı</div>
+        <div class="fg"><input type="text" id="p-ad" placeholder="Örn: Kadıköy 3+1 Deniz Manzaralı" autocomplete="off"></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Konum</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>İlçe / Bölge</label><input type="text" id="p-bolge" placeholder="Kadıköy" autocomplete="off"></div>
+            <div class="fg"><label>Mahalle</label><input type="text" id="p-mahalle" placeholder="Moda Mah." autocomplete="off"></div>
+          </div>
+          <div class="fg"><label>Sokak / Cadde</label><input type="text" id="p-sokak" placeholder="Bahariye Cad. No:12" autocomplete="off"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">İlan Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Portföy Kategorisi</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Yetkili Portföyüm</div>
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Sahibinden İlanı</div>
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Danışman Portföyü</div>
+              <div class="chip" onclick="selChip(this,'p-kategori');updPKat()">Müteahhit Projesi</div>
+            </div>
+            <input type="hidden" id="p-kategori">
+          </div>
+          <div class="fg" id="p-danisman-alani" style="display:none">
+            <label>Danışman Adı</label>
+            <input type="text" id="p-danisman-ad" placeholder="Danışmanın adı soyadı" autocomplete="off">
+          </div>
+          <div class="fg"><label>İlan Linki (opsiyonel)</label><input type="text" id="p-ilan-link" placeholder="https://www.sahibinden.com/ilan/..." autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>İlan Tipi</label>
+              <div class="chips">
+                <div class="chip" onclick="selChip(this,'p-tip')">Satılık</div>
+                <div class="chip" onclick="selChip(this,'p-tip')">Kiralık</div>
+              </div>
+              <input type="hidden" id="p-tip">
+            </div>
+            <div class="fg"><label>Konut Tipi</label>
+              <select id="p-ktipi">
+                <option value="">—</option>
+                <option>Apartman Dairesi</option><option>Site Dairesi</option><option>Müstakil Ev</option>
+                <option>Villa</option><option>Çatı Katı</option><option>Bahçe Katı</option>
+                <option>Dükkan / Ofis</option><option>Arsa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Detay Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>Fiyat (₺)</label><input type="number" id="p-fiyat" placeholder="0" inputmode="numeric"></div>
+            <div class="fg"><label>Alan (m²)</label><input type="number" id="p-alan" placeholder="0" inputmode="numeric"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Oda Sayısı</label>
+              <select id="p-oda">
+                <option value="">—</option>
+                <option>Stüdyo</option><option>1+0</option><option>1+1</option><option>2+1</option>
+                <option>3+1</option><option>4+1</option><option>4+2</option><option>5+1</option>
+              </select>
+            </div>
+            <div class="fg"><label>Bina Yaşı</label><input type="text" id="p-byasi" placeholder="0-5 yıl"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Kat</label><input type="text" id="p-kat" placeholder="3/8" autocomplete="off"></div>
+            <div class="fg"><label>Cephe</label>
+              <select id="p-cephe">
+                <option value="">—</option>
+                <option>Kuzey</option><option>Güney</option><option>Doğu</option><option>Batı</option><option>Kuzey-Güney</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Isıtma</label>
+              <select id="p-isitma">
+                <option value="">—</option>
+                <option>Doğalgaz (Kombi)</option><option>Merkezi</option><option>Yerden Isıtma</option><option>Klima</option><option>Soba</option>
+              </select>
+            </div>
+            <div class="fg"><label>Tapu Tipi</label>
+              <select id="p-tapu">
+                <option value="">—</option>
+                <option>Kat Mülkiyeti</option><option>Kat İrtifakı</option><option>Hisseli Tapu</option><option>Arsa Tapusu</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Özellikler</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Asansör</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Otopark</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Balkon</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Güvenlik</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Isı Yalıtım</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Ses Yalıtım</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Ebeveyn B.</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Amerikan Mutfak</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Havuz</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Spor Salonu</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Deniz Manzarası</div>
+              <div class="chip" onclick="togChip(this,'p-ozellik')">Bahçe</div>
+            </div>
+            <input type="hidden" id="p-ozellik">
+          </div>
+          <div class="fg"><label>Mülk Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'p-durum')">Aktif</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Opsiyonlu</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Satıldı</div>
+              <div class="chip" onclick="selChip(this,'p-durum')">Kiralandı</div>
+            </div>
+            <input type="hidden" id="p-durum">
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Yetki</div>
+        <div class="frow">
+          <div class="fg"><label>Yetki Başlangıcı</label><input type="date" id="p-yetki-bas"></div>
+          <div class="fg"><label>Yetki Bitişi</label><input type="date" id="p-yetki-bit"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Açıklama & Notlar</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Açıklama</label><textarea id="p-acik" placeholder="İlan metni, öne çıkan özellikler..."></textarea></div>
+          <div class="fg"><label>Notlarım</label><textarea id="p-not" placeholder="Kişisel notlar, eşleştirme fikirleri..."></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-green" onclick="save_('portfoy')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ MAHALLE ════ -->
+  <div class="screen" id="s-mahalle">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Mahalle Notu</h2><p>CRM Bölge Analizi → Saha Notları</p></div>
+      <span class="fpill" style="background:#fff3e0;color:var(--orange);">Bölge</span>
+    </div>
+    <div class="fbody">
+      <div class="info-box">ℹ️ Bu kayıt CRM'in <strong>Bölge Analizi → Saha Notları</strong> bölümüne aktarılır.</div>
+      <div class="fsec">
+        <div class="fsec-label">Genel Bilgiler</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="fg"><label>Mahalle Adı *</label><input type="text" id="mh-mahalle" placeholder="Mahalle" autocomplete="off"></div>
+            <div class="fg"><label>İlçe</label><input type="text" id="mh-ilce" placeholder="İlçe" autocomplete="off"></div>
+          </div>
+          <div class="fg"><label>İmar Durumu</label>
+            <div class="chips">
+              <div class="chip" onclick="selChip(this,'mh-imar')">Konut</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Ticari</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Karma</div>
+              <div class="chip" onclick="selChip(this,'mh-imar')">Belirsiz</div>
+            </div>
+            <input type="hidden" id="mh-imar">
+          </div>
+          <div class="fg"><label>Bina Yapısı</label>
+            <div class="chips">
+              <div class="chip" onclick="togChip(this,'mh-bina')">Müstakil</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Apartman</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Site / Rezidans</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Karma</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Eski Bina Ağırlıklı</div>
+              <div class="chip" onclick="togChip(this,'mh-bina')">Yeni Bina Ağırlıklı</div>
+            </div>
+            <input type="hidden" id="mh-bina">
+          </div>
+          <div class="fg"><label>Genel Notlar</label>
+            <textarea id="mh-not" placeholder="Fiyat eğilimi, gelişim potansiyeli, dikkat noktaları..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Sokak Detayları</div>
+        <div id="sklar-c" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button class="add-sk" onclick="addSokak()" style="margin-top:8px">＋ Sokak Ekle</button>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-orange" onclick="save_('mahalle')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ GÖRÜŞME ════ -->
+  <div class="screen" id="s-gorusme">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Görüşme Notu</h2><p>CRM görüşme kaydı</p></div>
+      <span class="fpill" style="background:#e8f0fb;color:#1a5fa0;">Görüşme</span>
+    </div>
+    <div class="fbody">
+      <div class="fsec">
+        <div class="fsec-label">Görüşme Bilgileri</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Müşteri Adı *</label><input type="text" id="g-musteri" placeholder="Ad Soyad" autocomplete="off"></div>
+          <div class="frow">
+            <div class="fg"><label>Görüşme Tipi</label>
+              <select id="g-tip">
+                <option>Telefon</option><option>WhatsApp</option>
+                <option>Yüz Yüze</option><option>E-posta</option><option>Saha Ziyareti</option>
+              </select>
+            </div>
+            <div class="fg"><label>İlgi Seviyesi</label>
+              <select id="g-ilgi">
+                <option>🔥 Çok Sıcak</option><option>✅ İlgili</option>
+                <option>🤔 Kararsız</option><option>❄️ Soğuk</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Tarih & Saat</label><input type="datetime-local" id="g-tarih"></div>
+          <div class="fg"><label>İlgili Mülk (opsiyonel)</label><input type="text" id="g-mulk" placeholder="Mülk adı veya adresi" autocomplete="off"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">Not & Takip</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="fg"><label>Görüşme Notu</label><textarea id="g-not" placeholder="Görüşmede konuşulanlar, müşteri talepleri..."></textarea></div>
+          <div class="fg"><label>Sonraki Adım</label><input type="text" id="g-adim" placeholder="Fiyat araştır, randevu ayarla..." autocomplete="off"></div>
+          <div class="fg"><label>Hatırlatıcı (opsiyonel)</label><input type="datetime-local" id="g-hat"></div>
+        </div>
+      </div>
+    </div>
+    <div class="savebar"><button class="savebtn btn-blue" onclick="save_('gorusme')">Kaydet ✓</button></div>
+  </div>
+
+  <!-- ════ SAHA ÖZETİ ════ -->
+  <div class="screen" id="s-ozet">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Gezi Özeti</h2><p>Bugünkü saha çalışması</p></div>
+    </div>
+    <div class="fbody" id="ozet-body"></div>
+    <div class="bpad"></div>
+  </div>
+
+  <!-- ════ EXPORT ════ -->
+  <div class="screen" id="s-export">
+    <div class="fhdr">
+      <div class="bbtn" onclick="goBack()">‹</div>
+      <div class="fhi"><h2>Dışa Aktarma</h2><p>CRM import için JSON</p></div>
+    </div>
+    <div class="fbody" id="export-body"></div>
+    <div class="bpad"></div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="dmodal" id="dmodal" onclick="closeDM(event)">
+    <div class="dsheet" id="dsheet">
+      <div class="dhandle"></div>
+      <div class="dtitle" id="dtitle">Kayıt Detayı</div>
+      <div id="dbody"></div>
+      <button class="dclose" onclick="closeDMbtn()">Kapat</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// VERİ & SABİTLER
+// ══════════════════════════════════════════
+var DB = JSON.parse(localStorage.getItem('saha_crm_v2') || '[]');
+var skCnt = 0;
+var curScr = 'home';
+var _editIdx = null;   // null = yeni kayıt, sayı = düzenleme modu indeksi
+var _deferredPrompt = null;
+
+var TIP_RENK = { esnaf:'#003DA5', musteri:'#CC0000', portfoy:'#1A7A45', mahalle:'#E65C00', gorusme:'#1a5fa0' };
+var TIP_LBL  = { esnaf:'Esnaf', musteri:'Kişi', portfoy:'Portföy', mahalle:'Mahalle', gorusme:'Görüşme' };
+var ETIK_MAP = { '🔥 Sıcak':'sicak','⭐ VIP':'vip','⏳ Bekliyor':'bekliyor','❄️ Soğuk':'soguk','🚨 Acil':'acil','👥 Referans':'referans' };
+
+var KISI_EK = {
+  'Alıcı':       [{id:'m-butce',    l:'Min Bütçe (₺)',         t:'number',ph:'3000000'},
+                  {id:'m-t-bolge',  l:'Tercih Bölge',           t:'text',  ph:'Kadıköy...'},
+                  {id:'m-t-oda',    l:'Tercih Oda',             t:'text',  ph:'3+1, 4+1'}],
+  'Kiracı':      [{id:'m-kira-max', l:'Max Kira Bütçesi (₺)',  t:'number',ph:'15000'},
+                  {id:'m-t-bolge',  l:'Tercih Bölge',           t:'text',  ph:'Kadıköy...'},
+                  {id:'m-kira-tar', l:'Taşınma Tarihi',         t:'date',  ph:''}],
+  'Satıcı':      [{id:'m-mulk-adr', l:'Mülk Adresi',           t:'text',  ph:'Kadıköy Mah.'},
+                  {id:'m-beklenti', l:'Fiyat Beklentisi (₺)',   t:'number',ph:'8500000'},
+                  {id:'m-sat-sure', l:'Satış Hedef Süresi',     t:'text',  ph:'3 ay'}],
+  'Mülk Sahibi': [{id:'m-mulk-adr', l:'Mülk Adresi',           t:'text',  ph:'Kadıköy Mah.'},
+                  {id:'m-deg-bkl',  l:'Değer Beklentisi (₺)',   t:'number',ph:'8000000'},
+                  {id:'m-deg-tar',  l:'Değerleme Tarihi',       t:'date',  ph:''}],
+  'Yatırımcı':   [{id:'m-yat-btc',  l:'Yatırım Bütçesi (₺)',   t:'number',ph:'5000000'},
+                  {id:'m-yat-amc',  l:'Yatırım Amacı',          t:'text',  ph:'Kira getirisi...'},
+                  {id:'m-yat-vad',  l:'Yatırım Vadesi',         t:'text',  ph:'5 yıl'}],
+  'Kurumsal':    [{id:'m-firma',    l:'Firma Adı',              t:'text',  ph:'ABC Şirketi A.Ş.'},
+                  {id:'m-vergi',    l:'Vergi No',               t:'text',  ph:'1234567890'},
+                  {id:'m-yetkili',  l:'Yetkili Kişi',           t:'text',  ph:'Mehmet Yılmaz'}],
+  'Müteahhit':   [{id:'m-firma',    l:'Firma / İnşaat Şirketi', t:'text',  ph:'XYZ İnşaat Ltd.'},
+                  {id:'m-prj-say',  l:'Aktif Proje Sayısı',     t:'number',ph:'3'},
+                  {id:'m-paylasim', l:'Paylaşım Tipi',          t:'text',  ph:'Satış paylaşımı'}],
+  'Danışman':    [{id:'m-ofis',     l:'Emlak Ofisi',            t:'text',  ph:'RE/MAX...'},
+                  {id:'m-sicil',    l:'Sicil / Lisans No',      t:'text',  ph:'TSKB12345'},
+                  {id:'m-pay-blg',  l:'Paylaşım Bölgesi',       t:'text',  ph:'Anadolu Yakası'}],
+  'Etki Çevresi':[{id:'m-iliski',   l:'İlişki Türü',            t:'text',  ph:'Arkadaş, Komşu...'},
+                  {id:'m-sektor',   l:'Meslek / Sektör',        t:'text',  ph:'Doktor, Öğretmen...'},
+                  {id:'m-potan',    l:'Potansiyel',             t:'text',  ph:'Yatırım düşünüyor'}]
+};
+
+var LABELS = {
+  ad:'Ad Soyad', tel:'Telefon', email:'E-posta', meslek:'Meslek', sosyal:'Sosyal Medya',
+  tip:'Tip', pipeline:'Pipeline', referans:'Referans', iletisim:'Tercih İletişim', not:'Notlar',
+  bolge:'Bölge', mahalle:'Mahalle', sokak:'Sokak', ktipi:'Konut Tipi',
+  fiyat:'Fiyat (₺)', alan:'Alan (m²)', oda:'Oda', byasi:'Bina Yaşı', kat:'Kat',
+  cephe:'Cephe', isitma:'Isıtma', tapu:'Tapu Tipi', ozellikler:'Özellikler',
+  durum:'Durum', yetkiBas:'Yetki Baş.', yetkiBit:'Yetki Bit.', acik:'Açıklama',
+  kategori:'Portföy Kat.', ilanLink:'İlan Linki', _danisman_ad:'Danışman (Metin)',
+  imar_durumu:'İmar', bina_yapisi:'Bina Yapısı', genel_not:'Genel Not',
+  musteri:'Müşteri', ilgi:'İlgi Seviyesi', tarih:'Tarih',
+  mulk:'Mülk', adim:'Sonraki Adım', hat:'Hatırlatıcı',
+  ilce:'İlçe', butce:'Bütçe', tercih_bolge:'Tercih Bölge', tercih_oda:'Tercih Oda',
+  kira_max:'Max Kira', mulk_adres:'Mülk Adresi', beklenti:'Fiyat Beklenti',
+  firma:'Firma', vergi_no:'Vergi No', yetkili:'Yetkili',
+  iliski:'İlişki Türü', sektor:'Sektör', potansiyel:'Potansiyel',
+  _esnaf_kira_durum:'Mülkiyet', _esnaf_kira_bedel:'Kira (₺)', _esnaf_piyasa:'Piyasa Yorumu',
+  _esnaf_sure:'İşyerinde Süre', _esnaf_kira_artis:'Kira Artış Beklentisi',
+  _esnaf_devir_bedel:'Devir Bedeli (₺)', _esnaf_hareketlilik:'Bölge Hareketliliği',
+  _esnaf_eldegistirme:'El Değiştirme', _esnaf_bos_dukkan:'Boş Dükkan',
+  _esnaf_referans:'Referans Potansiyeli', _esnaf_iletisim:'İletişim Tercihi',
+  _duzenlemeTarihi:'Son Düzenleme'
+};
+var SKIP = ['_id','_tip','_zaman','_zamanTR','_tarih','_label','_crm_kategori','etiketler','sokaklar','_notlar',
+  '_esnaf_kira_durum','_esnaf_kira_bedel','_esnaf_kira_artis','_esnaf_devir_bedel',
+  '_esnaf_sure','_esnaf_hareketlilik','_esnaf_eldegistirme','_esnaf_bos_dukkan',
+  '_esnaf_referans','_esnaf_iletisim','_esnaf_yetkili'];
+
+// ══════════════════════════════════════════
+// NAVİGASYON
+// ══════════════════════════════════════════
+function goTo(scr) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+scr).classList.add('active');
+  curScr = scr;
+  if(scr==='gorusme'){
+    var n=new Date(), p=n=>String(n).padStart(2,'0');
+    if(!_editIdx) // Yeni kayıtta varsayılan tarih
+      document.getElementById('g-tarih').value = n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());
+  }
+  // Form başlığını ve kaydet butonunu edit moduna göre güncelle
+  _updateFormUI(scr);
+}
+
+function _updateFormUI(scr){
+  var editMod = _editIdx !== null;
+  var tipMap = {esnaf:'Esnaf Görüşmesi', musteri:'Kişi / Müşteri', portfoy:'Portföy İlanı', mahalle:'Mahalle Notu', gorusme:'Görüşme Notu'};
+  var fhi = document.querySelector('#s-'+scr+' .fhi p');
+  if(fhi) fhi.textContent = editMod ? '✏️ Düzenleme modu' : ({esnaf:'Piyasa bilgisi ve işletme notu',musteri:'CRM ile birebir uyumlu',portfoy:'Mülk kaydı',mahalle:'CRM Bölge Analizi → Saha Notları',gorusme:'CRM görüşme kaydı'}[scr]||'');
+  var btn = document.querySelector('#s-'+scr+' .savebtn');
+  if(btn) btn.textContent = editMod ? 'Güncelle ✓' : 'Kaydet ✓';
+}
+function goBack(){ _editIdx=null; goTo('home'); renderHome(); }
+function showExport(){ goTo('export'); renderExport(); }
+function showOzet(){ goTo('ozet'); renderOzet(); }
+
+// Esnaf — mülkiyet seçimine göre koşullu alanları göster
+function esnafKiraToggle(secim) {
+  var kiraDetay  = document.getElementById('e-kira-detay');
+  var devirDetay = document.getElementById('e-devir-detay');
+  if(kiraDetay)  kiraDetay.style.display  = secim==='Kiracı'     ? 'flex' : 'none';
+  if(devirDetay) devirDetay.style.display = secim==='Devir'      ? ''     : 'none';
+}
+
+// ── Saha Özeti ──────────────────────────────────────
+function renderOzet() {
+  var el = document.getElementById('ozet-body');
+  if(!el) return;
+
+  var bugun = new Date().toLocaleDateString('tr-TR');
+  var bugunKayitlar = DB.filter(function(r){
+    return r._tarih === bugun;
+  });
+
+  // Tip bazlı sayım
+  var sayim = { esnaf:0, musteri:0, portfoy:0, mahalle:0, gorusme:0 };
+  bugunKayitlar.forEach(function(r){ if(sayim[r._tip]!==undefined) sayim[r._tip]++; });
+  var toplamBugun = bugunKayitlar.length;
+
+  // Tüm zamanlar
+  var toplamTum = DB.length;
+  var byT = {};
+  DB.forEach(function(r){ byT[r._tip]=(byT[r._tip]||0)+1; });
+
+  // Esnaf piyasa yorumları
+  var esnaflar = bugunKayitlar.filter(function(r){ return r._tip==='esnaf'; });
+  var referansVar = esnaflar.filter(function(r){ return r._esnaf_referans==='Evet'; }).length;
+  var devirVar = esnaflar.filter(function(r){
+    return (r._esnaf_kira_durum||'').toLowerCase().includes('devir');
+  }).length;
+
+  // Portföy kategorileri
+  var portfoyler = bugunKayitlar.filter(function(r){ return r._tip==='portfoy'; });
+  var yetkili = portfoyler.filter(function(r){ return r.kategori==='Yetkili Portföyüm'; }).length;
+  var sahibinden = portfoyler.filter(function(r){ return r.kategori==='Sahibinden İlanı'; }).length;
+  var danisman = portfoyler.filter(function(r){ return r.kategori==='Danışman Portföyü'; }).length;
+
+  var renk = { esnaf:'#003DA5', musteri:'#CC0000', portfoy:'#1A7A45', mahalle:'#E65C00', gorusme:'#1a5fa0' };
+  var ikon = { esnaf:'🏪', musteri:'👤', portfoy:'🏠', mahalle:'🗺️', gorusme:'📞' };
+  var lbl  = { esnaf:'Esnaf', musteri:'Kişi', portfoy:'Portföy', mahalle:'Mahalle', gorusme:'Görüşme' };
+
+  var html = '';
+
+  // Başlık
+  html += '<div style="padding:16px 0 8px">'
+    + '<div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--navy)">'
+    + new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})
+    + '</div>'
+    + '<div style="font-size:13px;color:var(--ink3);margin-top:2px">Bugünkü saha çalışmanız</div>'
+    + '</div>';
+
+  // Bugün kartları
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  ['esnaf','musteri','portfoy','mahalle','gorusme'].forEach(function(t){
+    var cnt = sayim[t] || 0;
+    html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px;box-shadow:var(--shadow)">'
+      + '<div style="font-size:22px;margin-bottom:4px">' + ikon[t] + '</div>'
+      + '<div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:' + (cnt>0?renk[t]:'var(--ink4)') + '">' + cnt + '</div>'
+      + '<div style="font-size:11px;color:var(--ink3);font-weight:600;margin-top:2px">' + lbl[t] + '</div>'
+      + '</div>';
+  });
+  // Toplam kutusu
+  html += '<div style="background:var(--navy);border-radius:var(--r);padding:14px 12px;box-shadow:var(--shadow-md)">'
+    + '<div style="font-size:20px;margin-bottom:4px">📋</div>'
+    + '<div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#fff">' + toplamBugun + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.75);font-weight:600;margin-top:2px">Bugün Toplam</div>'
+    + '</div>';
+  html += '</div>';
+
+  // Öne çıkan bulgular
+  if(toplamBugun > 0) {
+    var bulgular = [];
+    if(referansVar > 0)
+      bulgular.push({ ikon:'✅', renk:'var(--green)', mesaj: referansVar + ' esnaf referans potansiyeli gösterdi' });
+    if(devirVar > 0)
+      bulgular.push({ ikon:'🔄', renk:renk.esnaf, mesaj: devirVar + ' işletme devir durumunda — fırsat!' });
+    if(yetkili > 0)
+      bulgular.push({ ikon:'🏠', renk:renk.portfoy, mesaj: yetkili + ' yetkili portföy kaydedildi' });
+    if(sahibinden > 0)
+      bulgular.push({ ikon:'🔍', renk:'var(--orange)', mesaj: sahibinden + ' sahibinden ilanı tespit edildi' });
+    if(danisman > 0)
+      bulgular.push({ ikon:'👔', renk:renk.gorusme, mesaj: danisman + ' danışman portföyü not alındı' });
+
+    if(bulgular.length) {
+      html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Öne Çıkan Bulgular</div>';
+      html += bulgular.map(function(b){
+        return '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)">'
+          + '<span style="font-size:18px">' + b.ikon + '</span>'
+          + '<span style="font-size:13px;font-weight:600;color:' + b.renk + '">' + b.mesaj + '</span>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  // Bugünkü kayıtlar listesi
+  if(bugunKayitlar.length) {
+    html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin:12px 0 8px">Bugünkü Kayıtlar</div>';
+    bugunKayitlar.slice().reverse().forEach(function(r){
+      var idx = DB.indexOf(r);
+      html += '<div onclick="showDetail(' + idx + ')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--shadow)">'
+        + '<div style="width:8px;height:8px;border-radius:50%;background:' + (renk[r._tip]||'#888') + ';flex-shrink:0"></div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r._label||'—') + '</div>'
+        + '<div style="font-size:11px;color:var(--ink3)">' + (lbl[r._tip]||r._tip) + ' · ' + ((r._zamanTR||'').split(' ')[1]||'').slice(0,5) + '</div>'
+        + '</div>'
+        + '<span style="font-size:12px;color:var(--ink4)">›</span>'
+        + '</div>';
+    });
+  }
+
+  // Tüm zamanlar özet
+  html += '<div style="font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin:16px 0 8px">Tüm Zamanlarda</div>';
+  html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow)">';
+  ['esnaf','musteri','portfoy','mahalle','gorusme'].forEach(function(t){
+    var cnt = byT[t]||0;
+    if(!cnt) return;
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
+      + '<span style="font-size:13px">' + ikon[t] + ' ' + lbl[t] + '</span>'
+      + '<span style="font-family:var(--font-head);font-weight:700;font-size:13px;color:' + renk[t] + '">' + cnt + '</span>'
+      + '</div>';
+  });
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0 0">'
+    + '<span style="font-size:13px;font-weight:700">Toplam</span>'
+    + '<span style="font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--navy)">' + toplamTum + '</span>'
+    + '</div>';
+  html += '</div>';
+
+  // Export ve sıfırlama butonları
+  html += '<div style="display:flex;gap:8px;margin-top:16px">'
+    + '<button onclick="showExport()" style="flex:1;padding:13px;background:var(--navy);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-head)">📤 Dışa Aktar</button>'
+    + '</div>';
+
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+// CHİP HELPERLERİ
+// ══════════════════════════════════════════
+function togChip(el, hid) {
+  el.classList.toggle('on');
+  if(navigator.vibrate) navigator.vibrate(8);
+  document.getElementById(hid).value = Array.from(el.parentElement.querySelectorAll('.chip.on')).map(c=>c.textContent).join(', ');
+}
+function selChip(el, hid) {
+  el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  if(navigator.vibrate) navigator.vibrate(8);
+  document.getElementById(hid).value = el.textContent;
+}
+
+// ══════════════════════════════════════════
+// DİNAMİK ALANLAR
+// ══════════════════════════════════════════
+function updMTip() {
+  var tip = document.getElementById('m-tip').value;
+  var c   = document.getElementById('m-ek');
+  var al  = KISI_EK[tip]||[];
+  if(!al.length){ c.innerHTML=''; return; }
+  c.innerHTML = '<div class="fdiv" style="margin-top:4px">'+tip+' Detayları</div>'
+    + al.map(a=>'<div class="fg" style="margin-top:8px"><label>'+a.l+'</label><input type="'+a.t+'" id="'+a.id+'" placeholder="'+a.ph+'" autocomplete="off"></div>').join('');
+}
+function updPKat() {
+  var val = document.getElementById('p-kategori').value;
+  var alan = document.getElementById('p-danisman-alani');
+  if(alan) alan.style.display = val==='Danışman Portföyü' ? '' : 'none';
+}
+
+// ══════════════════════════════════════════
+// SOKAK
+// ══════════════════════════════════════════
+function addSokak() { addSokakWithData({}); }
+
+// ══════════════════════════════════════════
+// KAYIT
+// ══════════════════════════════════════════
+function v(id){ var e=document.getElementById(id); return e?e.value:''; }
+
+function save_(tip) {
+  var now=new Date();
+  var d={ _id:tip.charAt(0)+Date.now(), _tip:tip, _zaman:now.toISOString(), _zamanTR:now.toLocaleString('tr-TR'), _tarih:now.toLocaleDateString('tr-TR') };
+
+  if(tip==='esnaf') {
+    if(!v('e-isletme').trim()){ toast('İşletme adı zorunlu!','err'); return; }
+    d.ad=v('e-isletme').trim(); d.tel=v('e-tel'); d.tip='Esnaf';
+    d.meslek=v('e-istip'); d.iliski='Esnaf'; d.pipeline='İlk Görüşme';
+    var np=['[ESNAF]'];
+    if(v('e-yetkili'))         np.push('Yetkili: '+v('e-yetkili'));
+    if(v('e-sure'))            np.push('Süre: '+v('e-sure'));
+    if(v('e-kira-durum'))      np.push('Mülkiyet: '+v('e-kira-durum'));
+    if(v('e-kira-bedel'))      np.push('Kira: ₺'+v('e-kira-bedel'));
+    if(v('e-kira-artis'))      np.push('Kira Artış: '+v('e-kira-artis'));
+    if(v('e-devir-bedel'))     np.push('Devir Bedeli: ₺'+v('e-devir-bedel'));
+    if(v('e-hareketlilik'))    np.push('Hareketlilik: '+v('e-hareketlilik'));
+    if(v('e-eldegistirme'))    np.push('El Değiştirme: '+v('e-eldegistirme'));
+    if(v('e-bos-dukkan'))      np.push('Boş Dükkan: '+v('e-bos-dukkan'));
+    if(v('e-piyasa'))          np.push('Piyasa: '+v('e-piyasa'));
+    if(v('e-referans'))        np.push('Referans: '+v('e-referans'));
+    if(v('e-iletisim'))        np.push('İletişim Tercihi: '+v('e-iletisim'));
+    if(v('e-not'))             np.push('Not: '+v('e-not'));
+    d.not=np.join(' | ');
+    // Ayrıca erişilebilir alanlar olarak sakla
+    d._esnaf_kira_durum  = v('e-kira-durum');
+    d._esnaf_kira_bedel  = v('e-kira-bedel');
+    d._esnaf_kira_artis  = v('e-kira-artis');
+    d._esnaf_devir_bedel = v('e-devir-bedel');
+    d._esnaf_sure        = v('e-sure');
+    d._esnaf_hareketlilik= v('e-hareketlilik');
+    d._esnaf_eldegistirme= v('e-eldegistirme');
+    d._esnaf_bos_dukkan  = v('e-bos-dukkan');
+    d._esnaf_piyasa      = v('e-piyasa');
+    d._esnaf_referans    = v('e-referans');
+    d._esnaf_iletisim    = v('e-iletisim');
+    d._esnaf_yetkili     = v('e-yetkili');
+    d._label=d.ad;
+    clearF(['e-isletme','e-yetkili','e-tel','e-kira-bedel','e-devir-bedel','e-piyasa','e-not',
+            'e-istip','e-sure','e-kira-durum','e-kira-artis','e-hareketlilik',
+            'e-eldegistirme','e-bos-dukkan','e-referans','e-iletisim'],'esnaf');
+    // Koşullu alanları sıfırla
+    var kd=document.getElementById('e-kira-detay'); if(kd) kd.style.display='none';
+    var dd=document.getElementById('e-devir-detay'); if(dd) dd.style.display='none';
+
+  } else if(tip==='musteri') {
+    if(!v('m-ad').trim()){ toast('Ad Soyad zorunlu!','err'); return; }
+    d.ad=v('m-ad').trim(); d.tel=v('m-tel'); d.email=v('m-email');
+    d.meslek=v('m-meslek'); d.sosyal=v('m-sosyal'); d.tip=v('m-tip');
+    d.pipeline=v('m-pipe'); d.referans=v('m-ref'); d.iletisim=v('m-ilet');
+    d.not=v('m-not');
+    var etl=v('m-etiket'); d.etiketler=etl?[ETIK_MAP[etl]||etl]:[];
+    var ekMap={'Alıcı':{butce:'m-butce',tercih_bolge:'m-t-bolge',tercih_oda:'m-t-oda'},'Kiracı':{kira_max:'m-kira-max',tercih_bolge:'m-t-bolge',tasima_tarihi:'m-kira-tar'},'Satıcı':{mulk_adres:'m-mulk-adr',beklenti:'m-beklenti',satis_sure:'m-sat-sure'},'Mülk Sahibi':{mulk_adres:'m-mulk-adr',deger_beklenti:'m-deg-bkl',deger_tarihi:'m-deg-tar'},'Yatırımcı':{butce:'m-yat-btc',yatirim_amac:'m-yat-amc',yatirim_sure:'m-yat-vad'},'Kurumsal':{firma:'m-firma',vergi_no:'m-vergi',yetkili:'m-yetkili'},'Müteahhit':{firma:'m-firma',proje_sayisi:'m-prj-say',paylasim:'m-paylasim'},'Danışman':{ofis:'m-ofis',sicil:'m-sicil',paylasim_bolge:'m-pay-blg'},'Etki Çevresi':{iliski:'m-iliski',sektor:'m-sektor',potansiyel:'m-potan'}};
+    var ekA=ekMap[d.tip]||{};
+    Object.keys(ekA).forEach(k=>{ var val=v(ekA[k]); if(val) d[k]=val; });
+    d._label=d.ad;
+    clearF(['m-ad','m-tel','m-email','m-meslek','m-sosyal','m-not','m-tip','m-ref','m-ilet','m-etiket'],'musteri');
+    document.getElementById('m-ek').innerHTML='';
+    document.getElementById('m-pipe').selectedIndex=0;
+
+  } else if(tip==='portfoy') {
+    if(!v('p-ad').trim()){ toast('Mülk adı zorunlu!','err'); return; }
+    d.ad=v('p-ad').trim(); d.bolge=v('p-bolge'); d.mahalle=v('p-mahalle');
+    d.sokak=v('p-sokak'); d.kategori=v('p-kategori');
+    var _katMap={'Danışman Portföyü':'paylasim','Sahibinden İlanı':'sahibinden','Müteahhit Projesi':'muteahhit'};
+    d._crm_kategori=_katMap[d.kategori]||'yetkili';
+    d._danisman_ad=v('p-danisman-ad'); d.ilanLink=v('p-ilan-link');
+    d.tip=v('p-tip'); d.ktipi=v('p-ktipi'); d.fiyat=v('p-fiyat');
+    d.alan=v('p-alan'); d.oda=v('p-oda'); d.byasi=v('p-byasi');
+    d.kat=v('p-kat'); d.cephe=v('p-cephe'); d.isitma=v('p-isitma');
+    d.tapu=v('p-tapu'); d.ozellikler=v('p-ozellik');
+    d.durum=v('p-durum')||'Aktif';
+    d.yetkiBas=v('p-yetki-bas'); d.yetkiBit=v('p-yetki-bit');
+    d.acik=v('p-acik'); d._notlar=v('p-not');
+    d._label=d.ad+(d.bolge?' – '+d.bolge:'');
+    clearF(['p-ad','p-bolge','p-mahalle','p-sokak','p-fiyat','p-alan','p-byasi','p-kat','p-acik','p-not','p-tip','p-ktipi','p-ozellik','p-durum','p-cephe','p-isitma','p-tapu','p-yetki-bas','p-yetki-bit','p-ilan-link','p-kategori','p-danisman-ad'],'portfoy');
+    document.getElementById('p-oda').selectedIndex=0;
+    document.getElementById('p-danisman-alani').style.display='none';
+
+  } else if(tip==='mahalle') {
+    if(!v('mh-mahalle').trim()){ toast('Mahalle adı zorunlu!','err'); return; }
+    d.mahalle=v('mh-mahalle').trim(); d.ilce=v('mh-ilce');
+    d.imar_durumu=v('mh-imar'); d.bina_yapisi=v('mh-bina'); d.genel_not=v('mh-not');
+    var sk=[];
+    document.querySelectorAll('#sklar-c .skcard').forEach(c=>{
+      sk.push({ad:c.querySelector('.sk-ad')?.value||'',manzara:c.querySelector('.sk-mzr')?.value||'',trafik:c.querySelector('.sk-trf')?.value||'',yesil_alan:c.querySelector('.sk-ysl')?.value||'',toplu_tasima:c.querySelector('.sk-uls')?.value||'',ihtiyac_noktalari:c.querySelector('.sk-iht')?.value||'',not:c.querySelector('.sk-not')?.value||''});
+    });
+    d.sokaklar=sk; d._label=d.mahalle+(d.ilce?' / '+d.ilce:'');
+    clearF(['mh-mahalle','mh-ilce','mh-not','mh-imar','mh-bina'],'mahalle');
+    document.getElementById('sklar-c').innerHTML=''; skCnt=0;
+
+  } else if(tip==='gorusme') {
+    if(!v('g-musteri').trim()){ toast('Müşteri adı zorunlu!','err'); return; }
+    d.musteri=v('g-musteri').trim(); d.tip=v('g-tip'); d.ilgi=v('g-ilgi');
+    d.tarih=v('g-tarih'); d.mulk=v('g-mulk'); d.not=v('g-not');
+    d.adim=v('g-adim'); d.hat=v('g-hat'); d._label=d.musteri;
+    clearF(['g-musteri','g-mulk','g-not','g-adim','g-hat'],'gorusme');
+    document.getElementById('g-tip').selectedIndex=0;
+    document.getElementById('g-ilgi').selectedIndex=0;
+  }
+
+  if(_editIdx !== null){
+    // Düzenleme modu — eski kaydın id ve tarihini koru
+    d._id    = DB[_editIdx]._id;
+    d._zaman = DB[_editIdx]._zaman;
+    d._tarih = DB[_editIdx]._tarih;
+    d._zamanTR = DB[_editIdx]._zamanTR;
+    d._duzenlemeTarihi = new Date().toLocaleString('tr-TR');
+    DB[_editIdx] = d;
+    _editIdx = null;
+    saveDB();
+    toast('Kayıt güncellendi ✓');
+  } else {
+    DB.push(d);
+    saveDB();
+    toast('Kayıt eklendi ✓');
+  }
+  setTimeout(goBack, 600);
+}
+
+function clearF(ids, screenId) {
+  // Edit modunda form alanlarını temizleme — zaten güncellendi
+  if(_editIdx !== null) return;
+  ids.forEach(id=>{ var e=document.getElementById(id); if(e) e.value=''; });
+  var scope = screenId ? document.getElementById('s-'+screenId) : document;
+  if(scope) scope.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
+  var ekEl = document.getElementById('m-ek');
+  if(ekEl && screenId==='musteri') ekEl.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+}
+
+function saveDB(){
+  try {
+    var json = JSON.stringify(DB);
+    var kb = Math.round((json.length * 2) / 1024);
+    if(kb > 4500) toast('⚠️ Depolama dolmak üzere! Dışa aktarın.','warn');
+    localStorage.setItem('saha_crm_v2', json);
+    localStorage.setItem('saha_crm_v2_backup', json);
+    updBadge();
+  } catch(e) {
+    toast('❌ Kayıt başarısız! Depolama dolu olabilir.','err');
+  }
+}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function renderHome() {
+  var t=new Date();
+  document.getElementById('home-date').textContent = t.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('rec-count-lbl').textContent = DB.length+' kayıt';
+  document.getElementById('exp-cnt-lbl').textContent   = DB.length;
+  updBadge();
+  var list=document.getElementById('home-records');
+  if(!DB.length){ list.innerHTML='<div class="empty">Henüz kayıt yok. Yukarıdan senaryo seçin.</div>'; return; }
+  list.innerHTML=[...DB].reverse().slice(0,8).map((r,i)=>{
+    var idx=DB.length-1-i;
+    return `<div class="ri" onclick="showDetail(${idx})">
+      <div class="rdot" style="background:${TIP_RENK[r._tip]||'#888'}"></div>
+      <div class="rinfo"><div class="rn">${esc(r._label||'—')}</div><div class="rs">${TIP_LBL[r._tip]||r._tip} · ${r._tarih}</div></div>
+      <span class="rt">${(r._zamanTR?.split(' ')[1]||'').slice(0,5)}</span>
     </div>`;
   }).join('');
 }
 
-function toggleHist(i) {
-  const el = document.getElementById('hd-' + i);
-  if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+function updBadge(){
+  var b=document.getElementById('rec-badge');
+  if(DB.length>0){b.style.display='flex';b.textContent=DB.length>99?'99+':DB.length;}
+  else b.style.display='none';
 }
 
-function silOnayGoster(i) {
-  // Diğer açık onayları kapat
-  document.querySelectorAll('[id^="sil-onay-"]').forEach(el => el.style.display = 'none');
-  const el = document.getElementById('sil-onay-' + i);
-  if (el) el.style.display = 'block';
-}
+// ══════════════════════════════════════════
+// DETAIL MODAL
+// ══════════════════════════════════════════
+function showDetail(idx){
+  var r=DB[idx]; if(!r) return;
+  document.getElementById('dtitle').textContent = r._label||TIP_LBL[r._tip]||'Kayıt';
 
-function silOnayKapat(i) {
-  const el = document.getElementById('sil-onay-' + i);
-  if (el) el.style.display = 'none';
-}
+  var html='';
 
-function silYap(i) {
-  const origIdx = _silMap[i];
-  if (origIdx === undefined) { toast('❌ Kayıt bulunamadı'); return; }
-  DB.splice(origIdx, 1);
-  guvenliKaydet(DB);
-  document.querySelectorAll('.bni').forEach(b => b.classList.remove('on'));
-  document.getElementById('bni-gecmis')?.classList.add('on');
-  renderGecmis();
-  renderExpStats();
-  toast('🗑️ Kayıt silindi');
-}
-
-function silKayitBtn(btn) {} // eski — artık kullanılmıyor
-function silOnayla(btn) {}   // eski — artık kullanılmıyor
-
-// ── TAM DÜZENLEME — snapshot'tan tüm veriyi geri yükle ───────
-function kaydıDuzenle(i) {
-  const origIdx = _silMap[i];
-  if (origIdx === undefined) { toast('❌ Kayıt bulunamadı'); return; }
-  const kayit = DB[origIdx];
-  const snap  = kayit._snapshot;
-  const g     = kayit.gorusme || kayit;
-
-  _duzenleIdx = origIdx;
-
-  // A objesini doldur
-  if (snap) {
-    // Snapshot varsa (v4 ile kaydedilmiş) — tam geri yükleme
-    A = {
-      tip:          snap.tip,
-      musteri:      snap.musteri,
-      sirket:       snap.sirket || '',
-      ilgi:         snap.ilgi || '🔥 Çok Sıcak',
-      tarih:        snap.tarih || g.tarih || new Date().toISOString(),
-      cevaplar:     JSON.parse(JSON.stringify(snap.cevaplar || {})),
-      daireTipleri: JSON.parse(JSON.stringify(snap.daireTipleri || [])),
-      ekSorular:    JSON.parse(JSON.stringify(snap.ekSorular || [])),
-      riskler:      []
-    };
+  // Esnaf için özel zengin görünüm
+  if(r._tip==='esnaf'){
+    // Temel bilgiler
+    if(r.meslek) html+=`<div class="drow"><span class="dlbl">İş Tipi</span><span class="dval">${esc(r.meslek)}</span></div>`;
+    if(r.tel)    html+=`<div class="drow"><span class="dlbl">Telefon</span><span class="dval">${esc(r.tel)}</span></div>`;
+    // Mülkiyet blok
+    var kiraDurum = r._esnaf_kira_durum||'';
+    if(kiraDurum){
+      html+=`<div class="drow"><span class="dlbl">Mülkiyet</span><span class="dval" style="font-weight:700;color:${kiraDurum==='Devir'?'var(--green)':kiraDurum==='Kiracı'?'var(--orange)':'var(--navy)'}">${esc(kiraDurum)}</span></div>`;
+    }
+    if(r._esnaf_kira_bedel)  html+=`<div class="drow"><span class="dlbl">Kira (₺/ay)</span><span class="dval">₺${esc(r._esnaf_kira_bedel)}</span></div>`;
+    if(r._esnaf_kira_artis)  html+=`<div class="drow"><span class="dlbl">Kira Artış Beklentisi</span><span class="dval">${esc(r._esnaf_kira_artis)}</span></div>`;
+    if(r._esnaf_devir_bedel) html+=`<div class="drow"><span class="dlbl">Devir Bedeli (₺)</span><span class="dval" style="color:var(--green);font-weight:700">₺${esc(r._esnaf_devir_bedel)}</span></div>`;
+    if(r._esnaf_sure)        html+=`<div class="drow"><span class="dlbl">İşyerinde Süre</span><span class="dval">${esc(r._esnaf_sure)}</span></div>`;
+    // Piyasa blok
+    if(r._esnaf_hareketlilik)  html+=`<div class="drow"><span class="dlbl">Bölge Hareketliliği</span><span class="dval">${esc(r._esnaf_hareketlilik)}</span></div>`;
+    if(r._esnaf_eldegistirme)  html+=`<div class="drow"><span class="dlbl">El Değiştirme</span><span class="dval">${esc(r._esnaf_eldegistirme)}</span></div>`;
+    if(r._esnaf_bos_dukkan)    html+=`<div class="drow"><span class="dlbl">Boş Dükkan</span><span class="dval">${esc(r._esnaf_bos_dukkan)}</span></div>`;
+    if(r._esnaf_piyasa)        html+=`<div class="drow"><span class="dlbl">Piyasa Yorumu</span><span class="dval">${esc(r._esnaf_piyasa)}</span></div>`;
+    // Referans
+    var refRenk = r._esnaf_referans==='Evet'?'var(--green)':r._esnaf_referans==='Belki'?'var(--orange)':'var(--ink3)';
+    if(r._esnaf_referans)  html+=`<div class="drow"><span class="dlbl">Referans Potansiyeli</span><span class="dval" style="color:${refRenk};font-weight:700">${esc(r._esnaf_referans)}</span></div>`;
+    if(r._esnaf_iletisim)  html+=`<div class="drow"><span class="dlbl">İletişim Tercihi</span><span class="dval">${esc(r._esnaf_iletisim)}</span></div>`;
+    // Not
+    var notTemiz = (r.not||'').split(' | ').filter(function(p){return p.startsWith('Not: ');}).map(function(p){return p.replace('Not: ','');}).join('');
+    if(notTemiz) html+=`<div class="drow"><span class="dlbl">Notlarım</span><span class="dval">${esc(notTemiz)}</span></div>`;
   } else {
-    // Snapshot yok (eski kayıt) — temel bilgilerle doldur
-    A = resetA();
-    A.tip     = g._tip_kisi || 'Satıcı';
-    A.musteri = g.musteri   || '';
-    A.sirket  = g._sirket   || '';
-    A.ilgi    = g.ilgi      || '🔥 Çok Sıcak';
-    A.tarih   = g.tarih     || new Date().toISOString();
+    // Diğer tipler için standart gösterim
+    html=Object.keys(r).filter(function(k){return !SKIP.includes(k)&&r[k]&&r[k]!=='';}).map(function(k){
+      var lbl=LABELS[k]||k;
+      return `<div class="drow"><span class="dlbl">${lbl}</span><span class="dval">${esc(String(r[k]))}</span></div>`;
+    }).join('');
+    if(r.sokaklar&&r.sokaklar.length){
+      html+=r.sokaklar.map(function(s,i){
+        return `<div class="drow"><span class="dlbl">Sokak ${i+1}</span><span class="dval">${esc(s.ad||'—')}${s.manzara?' · '+s.manzara:''}${s.trafik?' · '+s.trafik:''}</span></div>`;
+      }).join('');
+    }
   }
 
-  // Yeni ekrana geç
-  showScr('sc-yeni');
-  document.querySelectorAll('.bni').forEach(b => b.classList.remove('on'));
-  document.getElementById('bni-yeni')?.classList.add('on');
+  html+=`<div class="drow" style="border:none"><span class="dlbl" style="color:var(--ink4);font-size:11px">Kayıt zamanı</span><span class="dval" style="color:var(--ink3);font-size:12px">${r._zamanTR}</span></div>`;
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+    <button onclick="editRecord(${idx})" style="padding:12px;background:var(--navy-pale);border:1.5px solid rgba(0,61,165,0.3);border-radius:var(--r);color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">✏️ Düzenle</button>
+    <button onclick="delRec(${idx})" style="padding:12px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);">🗑 Sil</button>
+  </div>`;
+  document.getElementById('dbody').innerHTML=html;
+  document.getElementById('dmodal').classList.add('open');
+}
 
-  // Katılımcı alanlarını doldur
-  document.getElementById('t-musteri').value = A.musteri;
-  document.getElementById('t-sirket').value  = A.sirket;
+function editRecord(idx){
+  var r=DB[idx]; if(!r) return;
+  closeDMbtn();
+  _editIdx = idx;
 
-  // İlgi chiplerini ayarla
-  document.querySelectorAll('.ilgi-chip').forEach(c => {
-    c.classList.toggle('on', c.dataset.v === A.ilgi);
-  });
+  if(r._tip==='esnaf'){
+    document.getElementById('e-isletme').value = r.ad||'';
+    document.getElementById('e-tel').value      = r.tel||'';
+    document.getElementById('e-yetkili').value  = r._esnaf_yetkili||'';
+    document.getElementById('e-kira-bedel').value  = r._esnaf_kira_bedel||'';
+    document.getElementById('e-devir-bedel').value = r._esnaf_devir_bedel||'';
+    document.getElementById('e-piyasa').value      = r._esnaf_piyasa||'';
+    document.getElementById('e-not').value         = '';
+    // Not alanından eski format parse et (geriye dönük uyumluluk)
+    (r.not||'').split(' | ').forEach(function(p){
+      if(p.startsWith('Not: ')) document.getElementById('e-not').value = p.replace('Not: ','');
+      if(!r._esnaf_kira_bedel && p.startsWith('Kira: ₺')) document.getElementById('e-kira-bedel').value = p.replace('Kira: ₺','');
+      if(!r._esnaf_piyasa && p.startsWith('Piyasa: ')) document.getElementById('e-piyasa').value = p.replace('Piyasa: ','');
+    });
+    // Chip'leri ayarla
+    setChip('s-esnaf', 'e-istip',          r.meslek||'');
+    setChip('s-esnaf', 'e-sure',            r._esnaf_sure||'');
+    setChip('s-esnaf', 'e-kira-durum',      r._esnaf_kira_durum||'');
+    setChip('s-esnaf', 'e-kira-artis',      r._esnaf_kira_artis||'');
+    setChip('s-esnaf', 'e-hareketlilik',    r._esnaf_hareketlilik||'');
+    setChip('s-esnaf', 'e-eldegistirme',    r._esnaf_eldegistirme||'');
+    setChip('s-esnaf', 'e-bos-dukkan',      r._esnaf_bos_dukkan||'');
+    setChip('s-esnaf', 'e-referans',        r._esnaf_referans||'');
+    setChip('s-esnaf', 'e-iletisim',        r._esnaf_iletisim||'');
+    // Koşullu alanları göster
+    esnafKiraToggle(r._esnaf_kira_durum||'');
+    goTo('esnaf');
 
-  // Tip kartını seç
-  document.querySelectorAll('.tip-card').forEach(c => c.classList.remove('sel'));
+  } else if(r._tip==='musteri'){
+    document.getElementById('m-ad').value     = r.ad||'';
+    document.getElementById('m-tel').value    = r.tel||'';
+    document.getElementById('m-email').value  = r.email||'';
+    document.getElementById('m-meslek').value = r.meslek||'';
+    document.getElementById('m-sosyal').value = r.sosyal||'';
+    document.getElementById('m-not').value    = r.not||'';
+    setSelect('m-pipe', r.pipeline||'Potansiyel');
+    setSelect('m-ref',  r.referans||'');
+    setSelect('m-ilet', r.iletisim||'');
+    setChip('s-musteri','m-tip', r.tip||'');
+    // Etiket chip'ini bul
+    var etikLabel = Object.keys(ETIK_MAP).find(k=>ETIK_MAP[k]===(r.etiketler&&r.etiketler[0]));
+    if(etikLabel) setChip('s-musteri','m-etiket', etikLabel);
+    // Tip'e özel ek alanlar
+    if(r.tip) {
+      updMTip();
+      setTimeout(function(){
+        var ekMap={'Alıcı':{butce:'m-butce',tercih_bolge:'m-t-bolge',tercih_oda:'m-t-oda'},'Kiracı':{kira_max:'m-kira-max',tercih_bolge:'m-t-bolge',tasima_tarihi:'m-kira-tar'},'Satıcı':{mulk_adres:'m-mulk-adr',beklenti:'m-beklenti',satis_sure:'m-sat-sure'},'Mülk Sahibi':{mulk_adres:'m-mulk-adr',deger_beklenti:'m-deg-bkl',deger_tarihi:'m-deg-tar'},'Yatırımcı':{butce:'m-yat-btc',yatirim_amac:'m-yat-amc',yatirim_sure:'m-yat-vad'},'Kurumsal':{firma:'m-firma',vergi_no:'m-vergi',yetkili:'m-yetkili'},'Müteahhit':{firma:'m-firma',proje_sayisi:'m-prj-say',paylasim:'m-paylasim'},'Danışman':{ofis:'m-ofis',sicil:'m-sicil',paylasim_bolge:'m-pay-blg'},'Etki Çevresi':{iliski:'m-iliski',sektor:'m-sektor',potansiyel:'m-potan'}};
+        var ekA=ekMap[r.tip]||{};
+        Object.keys(ekA).forEach(function(k){ var el=document.getElementById(ekA[k]); if(el) el.value=r[k]||''; });
+      },50);
+    }
+    goTo('musteri');
 
-  // Ek sorular listesini temizle
-  document.getElementById('ek-listesi').innerHTML = '';
-  ekSayac = 0;
-
-  // Daire tipi bölümünü temizle
-  const dtSection = document.getElementById('dt-section');
-  if (dtSection) dtSection.remove();
-
-  // Soru ekranına geç
-  document.getElementById('soru-tip-lbl').textContent    = A.tip;
-  document.getElementById('soru-musteri-lbl').textContent = '— ' + A.musteri;
-
-  // Müteahhit → daire tiplerini yükle
-  if (A.tip === 'Müteahhit') {
-    // Önce soru listesini render et (dt-section için gerekli)
-    renderSorular();
-    showAsama('soru');
-    // Daire tiplerini yükle
-    if (A.daireTipleri.length) {
-      A.daireTipleri.forEach(dt => {
-        dtEkle();
-        // En son eklenen satırı doldur
-        const satirlar = document.querySelectorAll('.dt-row');
-        const son = satirlar[satirlar.length - 1];
-        if (son) {
-          const id = son.id;
-          const set = (sfx, val) => { const el = document.getElementById(id+sfx); if(el) el.value = val||''; };
-          set('-tip', dt.tip); set('-adet', dt.adet); set('-alan', dt.alan);
-          set('-kat', dt.kat); set('-cephe', dt.cephe); set('-fiyat', dt.fiyat);
-          set('-pazarlik', dt.pazarlik); set('-kalan', dt.kalan);
+  } else if(r._tip==='portfoy'){
+    document.getElementById('p-ad').value         = r.ad||'';
+    document.getElementById('p-bolge').value      = r.bolge||'';
+    document.getElementById('p-mahalle').value    = r.mahalle||'';
+    document.getElementById('p-sokak').value      = r.sokak||'';
+    document.getElementById('p-ilan-link').value  = r.ilanLink||'';
+    document.getElementById('p-fiyat').value      = r.fiyat||'';
+    document.getElementById('p-alan').value       = r.alan||'';
+    document.getElementById('p-byasi').value      = r.byasi||'';
+    document.getElementById('p-kat').value        = r.kat||'';
+    document.getElementById('p-acik').value       = r.acik||'';
+    document.getElementById('p-not').value        = r._notlar||'';
+    document.getElementById('p-yetki-bas').value  = r.yetkiBas||'';
+    document.getElementById('p-yetki-bit').value  = r.yetkiBit||'';
+    document.getElementById('p-danisman-ad').value= r._danisman_ad||'';
+    setSelect('p-oda',   r.oda||'');
+    setSelect('p-cephe', r.cephe||'');
+    setSelect('p-isitma',r.isitma||'');
+    setSelect('p-tapu',  r.tapu||'');
+    setSelect('p-ktipi', r.ktipi||'');
+    setChip('s-portfoy','p-tip',      r.tip||'');
+    setChip('s-portfoy','p-durum',    r.durum||'');
+    setChip('s-portfoy','p-kategori', r.kategori||'');
+    // Özellikler — çoklu chip
+    if(r.ozellikler){
+      var seciliOz = r.ozellikler.split(',').map(s=>s.trim());
+      document.querySelectorAll('#s-portfoy .chip').forEach(function(c){
+        if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'p-ozellik'")&&seciliOz.includes(c.textContent.trim())){
+          c.classList.add('on');
         }
       });
-    } else {
-      dtEkle();
+      document.getElementById('p-ozellik').value = r.ozellikler;
     }
-  } else {
-    renderSorular();
-    showAsama('soru');
-  }
+    updPKat();
+    goTo('portfoy');
 
-  // Ek soruları yükle
-  if (A.ekSorular.length) {
-    A.ekSorular.forEach(e => {
-      ekSoruEkle();
-      const satirlar = document.querySelectorAll('.ek-row');
-      const son = satirlar[satirlar.length - 1];
-      if (son) {
-        const id = son.id;
-        const soruEl  = document.getElementById(id + '-soru');
-        const cevapEl = document.getElementById(id + '-cevap');
-        if (soruEl)  soruEl.value  = e.soru  || '';
-        if (cevapEl) cevapEl.value = e.cevap || '';
-      }
-    });
-  }
-
-  // Sonraki adım ve hatırlatıcı
-  document.getElementById('f-adim').value = g.adim || '';
-  document.getElementById('f-hat').value  = g.hat  || '';
-
-  toast('✏️ Düzenleme modu — değişiklikleri kaydedin');
-  updateProg();
-}
-
-// Not düzenleme
-function notDuzenle(i, origIdx) {
-  document.getElementById('not-view-'+i).style.display='none';
-  document.getElementById('not-edit-'+i).style.display='block';
-  document.getElementById('duzenle-btn-'+i).style.display='none';
-  document.getElementById('kaydet-btn-'+i).style.display='';
-  document.getElementById('iptal-btn-'+i).style.display='';
-}
-
-function notIptal(i) {
-  // Orijinal nota geri dön
-  const view=document.getElementById('not-view-'+i);
-  const edit=document.getElementById('not-edit-'+i);
-  if(view) { edit.value=view.textContent; view.style.display=''; edit.style.display='none'; }
-  document.getElementById('duzenle-btn-'+i).style.display='';
-  document.getElementById('kaydet-btn-'+i).style.display='none';
-  document.getElementById('iptal-btn-'+i).style.display='none';
-}
-
-function notKaydet(i, origIdx) {
-  const yeniNot = document.getElementById('not-edit-'+i)?.value || '';
-  if (origIdx===undefined || origIdx<0 || origIdx>=DB.length) { toast('❌ Kayıt bulunamadı'); return; }
-  if (DB[origIdx].gorusme) DB[origIdx].gorusme.not = yeniNot;
-  else DB[origIdx].not = yeniNot;
-  guvenliKaydet(DB);
-  toast('✅ Not güncellendi');
-  renderGecmis();
-}
-
-// ══════════════════════════════════════════════════════════════
-// EXPORT + VERİ GÜVENLİĞİ
-// ══════════════════════════════════════════════════════════════
-
-// H3 DÜZELTMESİ: Güvenli kayıt — try/catch + boyut kontrolü
-function guvenliKaydet(data) {
-  try {
-    const json = JSON.stringify(data);
-    const boyutKB = Math.round((json.length * 2) / 1024);
-    if (boyutKB > 4500) { // 4.5MB üstünde uyar
-      toast('⚠️ Depolama alanı dolmak üzere! Lütfen export yapın.');
+  } else if(r._tip==='mahalle'){
+    document.getElementById('mh-mahalle').value = r.mahalle||'';
+    document.getElementById('mh-ilce').value    = r.ilce||'';
+    document.getElementById('mh-not').value     = r.genel_not||'';
+    setChip('s-mahalle','mh-imar', r.imar_durumu||'');
+    // Bina yapısı — çoklu chip
+    if(r.bina_yapisi){
+      var secilenBina = r.bina_yapisi.split(',').map(s=>s.trim());
+      document.querySelectorAll('#s-mahalle .chip').forEach(function(c){
+        if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'mh-bina'")&&secilenBina.includes(c.textContent.trim())){
+          c.classList.add('on');
+        }
+      });
+      document.getElementById('mh-bina').value = r.bina_yapisi;
     }
-    localStorage.setItem('ta_db', json);
-    // Otomatik yedek — Ö1
-    localStorage.setItem('ta_db_backup', json);
-    localStorage.setItem('ta_son_kayit', new Date().toISOString());
-    return true;
-  } catch(e) {
-    toast('❌ Kayıt başarısız! Depolama dolu olabilir. Lütfen export yapın.');
-    return false;
+    // Sokakları yükle
+    var skC = document.getElementById('sklar-c');
+    skC.innerHTML=''; skCnt=0;
+    (r.sokaklar||[]).forEach(function(s){ addSokakWithData(s); });
+    goTo('mahalle');
+
+  } else if(r._tip==='gorusme'){
+    document.getElementById('g-musteri').value = r.musteri||'';
+    document.getElementById('g-mulk').value    = r.mulk||'';
+    document.getElementById('g-not').value     = r.not||'';
+    document.getElementById('g-adim').value    = r.adim||'';
+    document.getElementById('g-hat').value     = r.hat||'';
+    document.getElementById('g-tarih').value   = r.tarih ? r.tarih.slice(0,16) : '';
+    setSelect('g-tip',  r.tip||'Telefon');
+    setSelect('g-ilgi', r.ilgi||'');
+    goTo('gorusme');
   }
 }
 
-function renderExpStats() {
-  const el = document.getElementById('exp-stats'); if (!el) return;
-  const gorCnt  = DB.length;
-  const portCnt = DB.reduce((s,k) => s + (k.portfoyler?.length||0), 0);
-
-  // Ö2: Son export uyarısı
-  const sonExport  = localStorage.getItem('ta_son_export');
-  const sonKayit   = localStorage.getItem('ta_son_kayit');
-  let exportUyari  = '';
-  if (gorCnt > 0 && sonKayit) {
-    const gunFark = Math.floor((Date.now() - new Date(sonExport||0)) / 86400000);
-    if (!sonExport || gunFark > 3) {
-      exportUyari = `<div style="background:#fff0f0;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--red)">
-        ⚠️ ${sonExport ? gunFark+' gündür' : 'Hiç'} export yapılmadı — CRM'e aktarmayı unutmayın.
-      </div>`;
+// Chip'i programatik olarak seç (tek seçim)
+function setChip(screenId, hiddenId, value){
+  if(!value) return;
+  var screen = document.getElementById(screenId);
+  if(!screen) return;
+  screen.querySelectorAll('.chip').forEach(function(c){
+    if(c.getAttribute('onclick')&&c.getAttribute('onclick').includes("'"+hiddenId+"'")&&c.textContent.trim()===value.trim()){
+      c.classList.add('on');
     }
+  });
+  var hid = document.getElementById(hiddenId);
+  if(hid) hid.value = value;
+}
+
+// Select'i programatik olarak seç
+function setSelect(id, value){
+  var el=document.getElementById(id); if(!el||!value) return;
+  for(var i=0;i<el.options.length;i++){
+    if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
   }
+}
 
-  // Ö3: Depolama boyutu
-  const boyutKB = Math.round((JSON.stringify(DB).length * 2) / 1024);
-  const boyutPct = Math.round(boyutKB / 51.2); // 5120KB = 5MB
-
-  el.innerHTML = `${exportUyari}
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <div style="flex:1;background:var(--navy-p);border-radius:10px;padding:10px 8px;text-align:center">
-        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--navy)">${gorCnt}</div>
-        <div style="font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase">Görüşme</div>
+// Veriyle sokak kartı ekle
+function addSokakWithData(s){
+  skCnt++;
+  var n=skCnt, c=document.getElementById('sklar-c'), div=document.createElement('div');
+  div.className='skcard'; div.id='sk-'+n;
+  div.innerHTML=`<div class="skhead"><span>Sokak ${n}</span><button onclick="document.getElementById('sk-${n}').remove()">✕ Sil</button></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="fg"><label>Sokak Adı</label><input type="text" class="sk-ad" value="${esc(s.ad||'')}" placeholder="Sokak / Cadde adı" autocomplete="off"></div>
+      <div class="frow">
+        <div class="fg"><label>Manzara</label><select class="sk-mzr"><option value="">—</option><option>Deniz / Boğaz</option><option>Yeşil Alan</option><option>Şehir</option><option>İç Avlu</option><option>Karışık</option></select></div>
+        <div class="fg"><label>Trafik / Park</label><select class="sk-trf"><option value="">—</option><option>Sakin / Kolay Park</option><option>Orta Yoğunluk</option><option>Yoğun / Zor Park</option></select></div>
       </div>
-      <div style="flex:1;background:var(--green-p);border-radius:10px;padding:10px 8px;text-align:center">
-        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--green)">${portCnt}</div>
-        <div style="font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase">Portföy</div>
+      <div class="frow">
+        <div class="fg"><label>Yeşil Alan</label><select class="sk-ysl"><option value="">—</option><option>Yok</option><option>Az</option><option>Orta</option><option>Bol</option></select></div>
+        <div class="fg"><label>Toplu Taşıma</label><select class="sk-uls"><option value="">—</option><option>Yakın (yürüme)</option><option>Orta Mesafe</option><option>Uzak</option></select></div>
       </div>
-    </div>
-    <div style="margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:11px;color:var(--ink3)">Depolama</span>
-      <span style="font-size:11px;color:var(--ink3)">${boyutKB} KB / 5120 KB</span>
-    </div>
-    <div style="height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:14px">
-      <div style="height:100%;width:${boyutPct}%;background:${boyutPct>80?'var(--red)':boyutPct>60?'var(--gold)':'var(--green)'};border-radius:99px;transition:width .4s"></div>
+      <div class="fg"><label>Temel İhtiyaç Noktaları</label><textarea class="sk-iht sk-auto" rows="2" placeholder="Market, eczane, okul...">${esc(s.ihtiyac_noktalari||s.ihtiyacNoktalari||'')}</textarea></div>
+      <div class="fg"><label>Sokak Notu</label><textarea class="sk-not sk-auto" rows="2" placeholder="Bu sokakla ilgili notunuz">${esc(s.not||'')}</textarea></div>
     </div>`;
+  c.appendChild(div);
+  // Select değerlerini ayarla
+  setSelect2(div.querySelector('.sk-mzr'), s.manzara||'');
+  setSelect2(div.querySelector('.sk-trf'), s.trafik||'');
+  setSelect2(div.querySelector('.sk-ysl'), s.yesil_alan||s.yesilAlan||'');
+  setSelect2(div.querySelector('.sk-uls'), s.toplu_tasima||s.topluTasima||'');
+  // Auto-expand textarea'ları bağla ve mevcut içerik için boyutu ayarla
+  div.querySelectorAll('.sk-auto').forEach(function(ta){
+    autoExpand(ta);
+    ta.addEventListener('input', function(){ autoExpand(this); });
+  });
 }
 
-function exportJSON() {
-  if (!DB.length) { toast('⚠️ Dışa aktarılacak kayıt yok'); return; }
-  const gorusmeler = DB.map(k=>k.gorusme||k).map(g=>({
-    _id:g._id, _zaman:g._zaman, tip_veri:'gorusme',
-    musteri:g.musteri, musteriId:null, tarih:g.tarih,
-    tip:g.tip, ilgi:g.ilgi, mulk:g.mulk||'',
-    not:g.not||'', adim:g.adim||'', hat:g.hat||''
-  }));
-  const portfoyler = DB.flatMap(k=>k.portfoyler||[]).map(p=>({
-    _id:p._id, _zaman:p._zaman, tip_veri:'portfoy',
-    ad:p.ad, bolge:p.bolge, tip:p.tip,
-    _crm_kategori:p.kategori, fiyat:p.fiyat, alan:p.alan,
-    oda:p.oda, kat:p.kat||'', cephe:p.cephe||'',
-    tapu:p.tapu||'', ozellikler:p.ozellikler||'',
-    durum:p.durum, acik:p.acik, musteri:p.musteri, tarih:p.tarih
-  }));
-  const payload = {
-    _meta:{ kaynak:'Toplantı Asistanı v4', versiyon:'4.0',
-      tarih:new Date().toISOString(),
-      gorusme_sayisi:gorusmeler.length, portfoy_sayisi:portfoyler.length },
-    gorusmeler, portfoyler
-  };
-  const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `toplanti_asistan_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  // Ö2: Son export tarihini kaydet
-  localStorage.setItem('ta_son_export', new Date().toISOString());
-  toast(`✅ ${gorusmeler.length} görüşme, ${portfoyler.length} portföy export edildi`);
-  renderExpStats();
+function autoExpand(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
 
-// H4 DÜZELTMESİ: clearAll — confirm() yerine uygulama içi onay
-function clearAll() {
-  const el = document.getElementById('clearall-onay');
-  if (el) { el.style.display = el.style.display==='none' ? 'block' : 'none'; return; }
-  // İlk kez — onay kutusunu oluştur
-  const card = document.querySelector('#sc-export .card');
-  const onay = document.createElement('div');
-  onay.id = 'clearall-onay';
-  onay.style.cssText = 'background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;padding:14px;margin-top:12px';
-  onay.innerHTML = `<div style="font-size:13px;color:var(--red);font-weight:600;margin-bottom:10px">
-    ⚠️ Tüm ${DB.length} görüşme silinecek. Bu işlem geri alınamaz. Emin misiniz?
-  </div>
-  <div style="display:flex;gap:8px">
-    <button style="flex:1;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;cursor:pointer"
-      onclick="clearAllOnayla()">Evet, Tümünü Sil</button>
-    <button style="flex:1;background:var(--surface);color:var(--ink2);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:13px;cursor:pointer"
-      onclick="document.getElementById('clearall-onay').style.display='none'">İptal</button>
-  </div>`;
-  card.appendChild(onay);
-}
-
-function clearAllOnayla() {
-  // Yedeği koru — Ö1
-  localStorage.setItem('ta_db_backup', JSON.stringify(DB));
-  DB = [];
-  guvenliKaydet(DB);
-  renderGecmis();
-  renderExpStats();
-  const onay = document.getElementById('clearall-onay');
-  if (onay) onay.style.display = 'none';
-  toast('🗑️ Tüm veriler silindi. Yedek korundu.');
-}
-
-// ══════════════════════════════════════════════════════════════
-// RESET & TOAST
-// ══════════════════════════════════════════════════════════════
-function resetYeni(){
-  A=resetA(); ekSayac=0; _duzenleIdx=null;
-  document.getElementById('t-musteri').value='';
-  document.getElementById('t-sirket').value='';
-  document.querySelectorAll('.ilgi-chip').forEach((c,i)=>c.classList.toggle('on',i===0));
-  document.querySelectorAll('.tip-card').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('ek-listesi').innerHTML='';
-  const dtSection=document.getElementById('dt-section'); if(dtSection)dtSection.remove();
-  showAsama('tip');
-}
-
-// Ö1: Yedekten geri yükleme
-function yedekGeriYukle() {
-  const yedek = localStorage.getItem('ta_db_backup');
-  if (!yedek) { toast('⚠️ Yedek bulunamadı'); return; }
-  try {
-    const parsed = JSON.parse(yedek);
-    DB = parsed;
-    guvenliKaydet(DB);
-    renderGecmis();
-    renderExpStats();
-    toast('✅ Yedek geri yüklendi — ' + DB.length + ' kayıt');
-  } catch(e) {
-    toast('❌ Yedek bozuk, geri yüklenemedi');
+function setSelect2(el, value){
+  if(!el||!value) return;
+  for(var i=0;i<el.options.length;i++){
+    if(el.options[i].value===value||el.options[i].text===value){ el.selectedIndex=i; break; }
   }
 }
+function closeDM(e){ if(e.target===document.getElementById('dmodal')) closeDMbtn(); }
+function closeDMbtn(){ document.getElementById('dmodal').classList.remove('open'); }
 
-// Export ekranında yedek butonunu göster/gizle
-function gunceleYedekButonu() {
-  const el = document.getElementById('yedek-bolum');
-  if (!el) return;
-  const yedek = localStorage.getItem('ta_db_backup');
-  el.style.display = yedek ? 'block' : 'none';
-}
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.classList.add('on');
-  if(el._t) clearTimeout(el._t);
-  el._t=setTimeout(()=>{ el.classList.remove('on'); el._t=null; },2800);
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+function renderExport(){
+  var el=document.getElementById('export-body');
+  if(!DB.length){ el.innerHTML='<div class="empty" style="padding:40px 0">Henüz kayıt yok</div>'; return; }
+  var byT={};
+  DB.forEach(r=>{ if(!byT[r._tip]) byT[r._tip]=[]; byT[r._tip].push(r); });
+  var icons={esnaf:'🏪',musteri:'👤',portfoy:'🏠',mahalle:'🗺',gorusme:'📞'};
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  Object.keys(byT).forEach(tip=>{
+    html+=`<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:var(--shadow)">
+      <div style="font-size:22px;margin-bottom:4px">${icons[tip]||'📋'}</div>
+      <div style="font-family:var(--font-head);font-size:20px;font-weight:700;color:${TIP_RENK[tip]||'#888'}">${byT[tip].length}</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px;font-weight:600">${TIP_LBL[tip]||tip}</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  html+=`<div style="background:var(--navy-pale);border:1px solid rgba(0,61,165,0.2);border-radius:var(--r);padding:14px;margin-bottom:12px">
+    <div style="font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">📋 CRM Import Kılavuzu</div>
+    <div style="font-size:11.5px;color:var(--ink2);line-height:1.8">
+      👤 <strong>Kişi & Esnaf</strong> → S.musteriler<br>
+      🏠 <strong>Portföy</strong> → S.portfoy<br>
+      📞 <strong>Görüşme</strong> → S.gorusmeler<br>
+      🗺 <strong>Mahalle</strong> → Bölge Analizi → Saha Notları → İçe Aktar
+    </div>
+  </div>`;
+
+  html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+    <button onclick="expAll()" style="width:100%;padding:13px;background:var(--navy);border:none;border-radius:var(--r);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-head);box-shadow:var(--shadow-md)">⬇ Tümünü İndir (${DB.length} kayıt)</button>
+    ${['musteri','portfoy','gorusme','esnaf','mahalle'].map(t=>
+      `<button onclick="expTip('${t}')" style="width:100%;padding:11px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">${icons[t]} Sadece ${TIP_LBL[t]||t}${byT[t]?' ('+byT[t].length+')':' (0)'}</button>`
+    ).join('')}
+    <button onclick="clearAll()" style="width:100%;padding:11px;background:var(--red-pale);border:1.5px solid rgba(204,0,0,0.3);border-radius:var(--r);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">🗑 Tüm Kayıtları Sil</button>
+  </div>`;
+
+  html+=`<div style="font-family:var(--font-head);font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px">Tüm Kayıtlar (${DB.length})</div>`;
+  [...DB].reverse().forEach((r,ri)=>{
+    var idx=DB.length-1-ri;
+    html+=`<div onclick="showDetail(${idx})" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--shadow)">
+      <div style="width:8px;height:8px;border-radius:50%;background:${TIP_RENK[r._tip]||'#888'};flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r._label||'—')}</div>
+        <div style="font-size:11px;color:var(--ink3)">${TIP_LBL[r._tip]||r._tip} · ${r._tarih}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
 }
 
-// Android geri tuşu
-window.addEventListener('popstate',()=>{
-  if(document.getElementById('asama-ozet').style.display!=='none'){showAsama('soru');history.pushState(null,'');}
-  else if(document.getElementById('asama-soru').style.display!=='none'){showAsama('tip');history.pushState(null,'');}
+function expAll(){ dlJSON(DB,'saha_crm_'+new Date().toISOString().slice(0,10)+'.json'); }
+function expTip(tip){
+  var f=DB.filter(r=>r._tip===tip);
+  if(!f.length){ toast('Bu tipte kayıt yok','warn'); return; }
+  dlJSON(f,'saha_'+tip+'_'+new Date().toISOString().slice(0,10)+'.json');
+}
+function dlJSON(data,fn){
+  var b=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=fn; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(u);
+  toast('JSON indirildi ✓');
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type?' '+type:'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ══════════════════════════════════════════
+// PWA & INIT
+// ══════════════════════════════════════════
+var _deferredPrompt=null;
+function pwaInstall(){
+  if(!_deferredPrompt){ toast('Tarayıcı menüsünden "Ana ekrana ekle" seçin.'); return; }
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(r=>{ if(r.outcome==='accepted') toast('Yükleniyor...'); _deferredPrompt=null; });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  renderHome();
+  history.pushState(null,'');
+  window.addEventListener('popstate',function(){
+    if(curScr!=='home'){ goBack(); history.pushState(null,''); }
+  });
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); _deferredPrompt=e;
+    document.getElementById('install-btn').style.display='flex';
+  });
+  window.addEventListener('appinstalled',function(){
+    _deferredPrompt=null;
+    document.getElementById('install-btn').style.display='none';
+    toast('Uygulama ana ekrana eklendi ✓');
+  });
 });
-history.pushState(null,'');
 </script>
 </body>
 </html>
